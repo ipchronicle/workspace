@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">IPChronicle organization avatar</title>
+  <desc id="desc">An open chronicle ring with a clock hand and a highlighted latest event.</desc>
+  <rect width="1024" height="1024" rx="224" fill="#101418"/>
+  <path
+    d="M 714 310 A 286 286 0 1 0 714 714"
+    fill="none"
+    stroke="#35D0BA"
+    stroke-width="96"
+    stroke-linecap="round"
+  />
+  <path d="M 512 352 V 672" fill="none" stroke="#F7F8F5" stroke-width="72" stroke-linecap="round"/>
+  <path d="M 512 512 H 686" fill="none" stroke="#F7F8F5" stroke-width="72" stroke-linecap="round"/>
+  <circle cx="716" cy="512" r="52" fill="#FF6B5E"/>
+</svg>
