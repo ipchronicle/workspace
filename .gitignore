@@ -1,0 +1,11 @@
+/repos/
+/references/
+/data/
+/artifacts/
+/.env
+/.env.*
+!/.env.example
+
+.DS_Store
+.idea/
+.vscode/
