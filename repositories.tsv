@@ -1,6 +1,0 @@
-# name	path	url	default_ref	role
-server	repos/server	https://github.com/ipchronicle/server.git	main	product
-web	repos/web	https://github.com/ipchronicle/web.git	main	product
-agent	repos/agent	https://github.com/ipchronicle/agent.git	main	product
-deploy	repos/deploy	https://github.com/ipchronicle/deploy.git	main	product
-komari-ip-history	references/komari-ip-history	https://github.com/qqqasdwx/Komari-ip-history.git	archive/wip-20260806	reference

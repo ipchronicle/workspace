@@ -1,80 +1,59 @@
 # IPChronicle Workspace Instructions
 
-## Scope
+## 语言与协作
 
-These instructions apply to the workspace repository and all nested repositories
-unless a closer `AGENTS.md` provides repository-specific rules.
+- 默认使用简体中文回复用户。
+- 直接、务实、简洁，先给结论，再提供必要依据。
+- 对分析、讨论和审查请求不要擅自修改文件。
+- 对明确的实现任务，先检查相关仓库，再制定短计划、实现和验证。
 
-Default to Simplified Chinese in user-facing replies unless the user requests a
-different language. Keep replies direct, practical, and concise.
+## 开始工作前
 
-## Workspace purpose
+必须先阅读 `docs/project-background.md`。该文件是理解项目起因、已确认决策和未决事项的入口。
 
-This repository coordinates independent IPChronicle repositories. It owns:
+不要从仓库名称、空目录或旧项目代码推断技术栈和最终架构。当前 GitHub 上的 `server`、`web`、`agent`、`deploy` 仓库只是预留位置，可以在架构讨论后合并、改名、停用或替换。
 
-- repository manifests and reproducible commit locks
-- cross-repository development scripts
-- system architecture records and ADRs
-- shared collaboration and validation rules
+## Workspace 职责
 
-It does not own product source code. Do not add server, web, agent, or deployment
-implementation under the workspace repository.
+workspace 仓库只维护：
 
-## Repository map
+- 项目背景和跨仓库上下文
+- 已确认的架构决策记录
+- 对多个仓库都适用的协作规则
+- 在确有重复需求后建立的开发辅助设施
 
-- `repos/server`: server-side product repository
-- `repos/web`: web client product repository
-- `repos/agent`: node-side agent product repository
-- `repos/deploy`: deployment and operations repository
-- `references/komari-ip-history`: reference-only legacy project
+workspace 不承载产品源码，也不预先规定构建工具、开发环境、仓库清单或版本锁定方式。
 
-The legacy project is source material, not a compatibility requirement. Do not
-copy its architecture, dependencies, naming, or behavior into IPChronicle unless
-the user explicitly accepts that decision.
+## 旧项目边界
 
-## Current project phase
+`references/komari-ip-history` 是旧项目的只读参考检出。它用于了解历史需求、用户流程、踩坑记录和已有验证场景，不是新项目的基础代码。
 
-The technology stack and retained product features are not decided. Do not select
-frameworks, databases, protocols, deployment topology, or feature scope merely to
-fill an empty repository. Record consequential decisions in `docs/decisions/`
-after discussing them with the user.
+除非用户明确确认，否则不要：
 
-## Cross-repository workflow
+- 复制旧项目架构或大段实现
+- 保持旧 API、数据库或部署兼容
+- 继续以 Komari 作为核心依赖
+- 默认保留旧项目的功能和技术选型
 
-1. Run `./scripts/status.sh` before making changes.
-2. Identify the owning repository for every change.
-3. Read the nearest repository `AGENTS.md` before editing.
-4. Keep commits scoped to one repository; never commit nested repository content
-   from the workspace root.
-5. Validate each changed repository using its own documented commands.
-6. Run `./scripts/check.sh` for cross-repository validation.
-7. Run `./scripts/update-lock.sh` only after the intended child commits exist.
-8. Commit the updated lock separately in the workspace repository.
+需要借鉴旧实现时，先说明借鉴对象、理由和替代方案。
 
-Do not add Git submodules. `repositories.tsv` and `repositories.lock` are the
-workspace's repository coordination mechanism.
+## 多仓库工作
 
-## Engineering rules
+- 修改前分别检查 workspace 和相关子仓库的 Git 状态。
+- 阅读距离目标文件最近的 `AGENTS.md`。
+- 每个仓库保持独立提交，不从 workspace 根仓库提交嵌套仓库内容。
+- 不使用 Git submodule，除非后续明确决定采用。
+- 不假设所有预留仓库都必须参与某项功能。
+- 跨仓库长期约束应记录到 `docs/decisions/`。
 
-- Prefer explicit contracts and single sources of truth.
-- Keep implementation details inside the repository that owns them.
-- Do not create shared libraries until concrete duplication and release ownership
-  justify a separate repository.
-- Let failures surface clearly; do not add mock success paths or silent fallbacks.
-- Keep secrets in ignored local files or an external secret store.
-- Never commit real credentials, local databases, dependency directories, build
-  output, or VM state.
-- Preserve unrelated user changes in every repository.
-- Use non-destructive Git operations unless the user explicitly requests otherwise.
+## 工程与安全
 
-## Documentation
+- 修复根因，不添加第二套事实来源、静默回退或伪成功路径。
+- 不提交真实凭据、环境文件、本地数据库、依赖目录、构建产物或 VM 状态。
+- 不回退无关的用户改动，不使用破坏性 Git 操作。
+- 新增大型依赖、服务或基础设施前，先解释为什么更简单的方案不够。
+- 实现后运行与改动风险匹配的测试，并检查 diff 中的秘密、生成物和无关修改。
 
-Architecture documents must stand alone without chat history. Use ADRs for choices
-that constrain more than one repository. Repository-specific implementation notes
-belong in that repository, not in workspace architecture documents.
+## 文档
 
-## Validation and reporting
-
-After changes, report the affected repositories, commits created, checks run, and
-remaining risks. If a repository has no validation command yet, say so explicitly
-instead of inventing one.
+文档必须脱离聊天上下文仍可独立理解。技术栈、功能范围、协议、存储、部署和仓库边界等长期决定，应在用户确认后写入决策记录，不要把尚未决定的方案写成既定事实。
