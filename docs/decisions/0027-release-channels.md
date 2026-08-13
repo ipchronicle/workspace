@@ -22,6 +22,9 @@ not be confused with versions suitable for a root Agent's update mechanism.
   `v1.2.3-rc.2`.
 - A new installation and an existing stable deployment discover only stable
   updates by default.
+- The official Agent installer resolves the latest release in the requested
+  channel. The center supplies the deployment's channel to the onboarding UI
+  but does not select or pin an Agent version; ADR 0054 defines this boundary.
 - The administrator may explicitly place the deployment on the release-
   candidate channel. The selection applies to center and Agent update
   discovery as one product policy rather than allowing component-specific

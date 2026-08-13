@@ -28,9 +28,11 @@ several manual installation and service-management steps.
   a node and returns a node-specific persistent credential.
 - Registration does not require the user to create a node in the center first
   and does not use a separate node-specific one-time installation token.
-- The center generates one command that downloads the appropriate Agent,
-  registers it, configures the supported systemd or OpenRC service, and starts
-  it without a second manual configuration step.
+- The web client generates one command from center-provided enrollment data
+  and the fixed official installer entry point. The installer downloads the
+  appropriate Agent, registers it, configures the supported systemd or OpenRC
+  service, and starts it without a second manual configuration step. ADR 0054
+  defines the installer and release-resolution boundary.
 - After successful registration, the deployment-wide registration key is not
   retained in the service definition or the Agent's long-term configuration.
 - Re-running the installation command preserves an existing valid local Agent
