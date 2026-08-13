@@ -65,3 +65,4 @@ Do not use an ADR to document a decision that has not been made.
 - [0048: Support Simplified Chinese and English](0048-support-chinese-and-english.md)
 - [0049: Use Vite for the web build](0049-use-vite-for-the-web-build.md)
 - [0050: Defer history compatibility until the first stable release](0050-defer-history-compatibility-until-first-release.md)
+- [0054: Keep Agent installation version resolution outside the center](0054-keep-agent-installation-version-resolution-outside-center.md)
