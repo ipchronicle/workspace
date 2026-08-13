@@ -175,10 +175,12 @@ persisted, visible, idempotent operation rather than a claimed atomic commit.
 
 ### Enrollment And Configuration
 
-1. The center generates one installation command containing a reusable
-   registration key.
-2. The root installer downloads the matching official Agent artifact,
-   registers the node, installs its service, and starts it.
+1. The center exposes a reusable registration key and the deployment settings
+   needed by the web client to render one installation command.
+2. The root installer resolves the selected official release channel,
+   downloads the appropriate Agent artifact, registers the node, installs its
+   service, and starts it. It does not derive the Agent version from the
+   running center version.
 3. Registration replaces the shared key with a node-specific persistent
    credential. The Agent stores that credential in root-only local state; the
    center stores only its digest.
