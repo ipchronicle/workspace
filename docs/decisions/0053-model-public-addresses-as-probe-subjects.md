@@ -1,6 +1,6 @@
 # ADR 0053: Model public addresses as probe subjects
 
-Status: Accepted (rediscovery and replacement semantics superseded by ADR 0059)
+Status: Accepted (rediscovery and replacement semantics superseded by ADR 0059; manual target policy refined by ADR 0061)
 
 Date: 2026-08-12
 
@@ -81,9 +81,10 @@ apply where they do not conflict with this record.
   selected execution path changes.
 - A public address alone still cannot be entered or probed arbitrarily. It must
   first be observed through a path on a managed node.
-- Node-level schedules and immediate commands execute the enabled public
-  addresses whose selected paths belong to that node. Moving the selected path
-  to another node also moves future execution responsibility.
+- Node-level schedules execute enabled public addresses whose selected paths
+  belong to that node. Immediate commands follow ADR 0061 and may explicitly
+  select a disabled address for one run. Moving the selected path to another
+  node also moves future execution responsibility.
 
 ## Alternatives Considered
 

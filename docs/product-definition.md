@@ -316,8 +316,10 @@ The intended product scope includes:
   new schedule starts with its next future occurrence;
 - each started complete probe is one node-level run with a frozen ordered
   target set. Recurring runs contain every enabled public IP whose selected
-  path belongs to the node, manual runs contain the administrator's selected
-  targets, and address-set-change runs contain only newly current enabled IPs;
+  path belongs to the node, manual runs contain the administrator's explicit
+  one-time selection regardless of recurring enablement, and address-set-change
+  runs contain only newly current enabled IPs. Creating a manual run does not
+  change persistent enablement;
   children run sequentially, and one child failure does not prevent later
   public IPs from running;
 - each child execution starts IPQuality at most once; download, process,

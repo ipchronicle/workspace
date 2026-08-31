@@ -89,7 +89,8 @@ The Agent owns node-local behavior that must continue without the center:
 - interface, route, and source-address inventory;
 - lightweight public-address checks through hidden discovery paths;
 - local recurring schedules and address-change triggers;
-- serialized complete probing of all enabled public IPs selected for that node;
+- serialized complete probing of enabled recurring targets or explicit manual
+  targets selected for that node;
 - durable application of complete configuration snapshots;
 - bounded offline result storage and idempotent replay;
 - task acknowledgement and execution deduplication; and
@@ -254,9 +255,11 @@ probe.
 2. The Agent creates one stable node-level run and freezes its applied
    configuration revision and ordered target set. A recurring run targets all
    enabled public IPs whose selected paths belong to the node, a manual run
-   targets the administrator's selection, and an address-set-change run
-   targets only newly current enabled IPs. Each target receives a stable child execution
-   identity. One node runs at most one such run;
+   targets the administrator's explicit one-time selection without changing or
+   applying recurring enablement, and an address-set-change run targets only
+   newly current enabled IPs. Agent configuration therefore includes all
+   currently available targets and their enablement values. Each target receives
+   a stable child execution identity. One node runs at most one such run;
    overlapping or missed occurrences are visible and never queued for catch-up.
 3. Child executions run sequentially. Failure or skip of one child does not
    discard successful siblings or stop a later eligible public IP.

@@ -1,6 +1,6 @@
 # ADR 0059: Probe newly current public IPs by node policy
 
-Status: Accepted
+Status: Accepted (manual target policy refined by ADR 0061)
 
 Date: 2026-08-30
 
@@ -53,9 +53,10 @@ whether it has just entered the node's confirmed set.
 - The automatic run waits until the Agent has applied configuration containing
   each newly current IP and its selected path. Existing single-run, bounded-state,
   busy-skip, and no-catch-up rules continue to apply.
-- Public IPs retain independent complete-probe enablement for manual and
-  recurring target selection. Newly created IPs remain enabled by default.
-  An explicitly disabled IP is not run by the node's address-change trigger.
+- Public IPs retain independent complete-probe enablement for recurring and
+  automatic target selection. Newly created IPs remain enabled by default. An
+  explicitly disabled IP is not run by the node's address-change trigger.
+  Manual selection follows ADR 0061 and does not change this setting.
 - There is no per-IP "probe after rediscovery" setting or product behavior.
   An older IP entering the current set again follows the same node policy and
   reuses its canonical history.
@@ -67,7 +68,8 @@ This record replaces ADR 0004's per-egress trigger setting and its rule to
 probe every enabled egress after one address changes. It replaces ADR 0053 and
 ADR 0057 clauses that attach rediscovery-triggered probing to a public IP. The
 first-observation boundary, per-IP report identity, new-IP default enablement,
-and manual and recurring probe behavior remain in force.
+and recurring probe behavior remain in force. ADR 0061 refines manual target
+selection independently.
 
 ## Consequences
 

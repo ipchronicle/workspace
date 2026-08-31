@@ -1,6 +1,6 @@
 # ADR 0004: Separate address checks from complete probes
 
-Status: Accepted (automatic address-set policy partially superseded by ADR 0059; timezone policy superseded by ADR 0060)
+Status: Accepted (automatic address-set policy partially superseded by ADR 0059; timezone policy superseded by ADR 0060; manual target policy refined by ADR 0061)
 
 Date: 2026-08-06
 
@@ -50,6 +50,9 @@ the complete upstream probe.
   manual or recurring complete-probe runs.
 - The user controls the recurring complete-probe frequency. IPChronicle will
   not enforce a minimum interval.
+- Per-public-IP enablement applies to recurring and automatic new-address runs.
+  ADR 0061 defines manual target selection as a one-time choice that does not
+  change this persistent setting.
 - The center does not stagger user schedules or impose a fleet-wide
   concurrency policy. Several Agents may execute at the same configured time.
 - Third-party rate limits, resource exhaustion, and probe errors caused by an
