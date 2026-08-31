@@ -1,8 +1,11 @@
 # ADR 0050: Defer history compatibility until the first stable release
 
-Status: Accepted
+Status: Superseded by ADR 0058
 
 Date: 2026-08-07
+
+ADR 0058 expands the pre-release compatibility boundary to all persisted
+development data and is the current decision.
 
 ## Context
 

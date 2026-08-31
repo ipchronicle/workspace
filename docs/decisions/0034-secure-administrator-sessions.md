@@ -1,6 +1,6 @@
 # ADR 0034: Use persistent server-side administrator sessions
 
-Status: Accepted
+Status: Accepted, amended by ADR 0051
 
 Date: 2026-08-06
 
@@ -39,14 +39,15 @@ reverse-proxy address trust, and TOTP recovery as one boundary.
   recovering the account, or disabling or resetting TOTP invalidates all
   existing administrator sessions.
 - The session cookie is `HttpOnly` and `SameSite=Lax`, is scoped to the
-  application's configured base path, and receives `Secure` when the
-  explicitly configured external URL or trusted proxy scheme is HTTPS.
+  application path, and receives `Secure` when the direct or trusted-proxy
+  request scheme is HTTPS. ADR 0051 separates this request policy from the
+  editable external origin used to publish links.
 - The product permits a non-`Secure` cookie for an intentional HTTP
   deployment and displays the accepted transport warning. It does not claim
   to protect the password, TOTP code, or session token from HTTP interception.
 - Every state-changing browser API has CSRF protection and validates the
-  request origin against the configured application origin. The exact token
-  mechanism is selected with the HTTP implementation.
+  request origin against the actual request host and effective scheme. The
+  editable external origin in ADR 0051 does not authorize browser requests.
 - Login attempts are throttled by both normalized account name and trusted
   client address. Repeated failures receive a bounded increasing delay, but
   the product does not permanently lock the only administrator account.

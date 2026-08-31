@@ -57,26 +57,26 @@ multi-user collaboration.
 - If the center is unavailable, the Agent continues recurring work using its
   last accepted configuration and stores results in a bounded durable queue
   for idempotent upload after reconnection.
-- Nodes and egresses can be disabled without losing configuration or history.
-  Disabled nodes retain authenticated control polling but stop all probes;
-  disabled egresses are excluded from checks and probe tasks.
-- Permanent deletion explicitly and irreversibly removes the selected node or
-  egress configuration, current state, history, starred snapshots, and related
-  notification records. Node deletion revokes the Agent identity; once the
-  Agent receives that rejection it stops local schedules and does not
-  automatically recreate the node.
+- Nodes can be disabled without losing configuration or history. A disabled
+  node retains authenticated control polling but stops discovery and complete
+  probes.
+- Deleting a node revokes its Agent identity and removes the node, its hidden
+  discovery paths, and node-level state. Globally identified public IPs,
+  complete reports, starred snapshots, and address events already assigned to
+  a public IP remain available. Once the Agent receives the rejection it stops
+  local schedules and does not automatically recreate the node.
 - The Agent retains at most 30 unuploaded complete-probe results independently
-  for each network egress. A new result beyond that limit evicts the oldest
-  result for the same egress and records the resulting history gap.
+  for each discovered public IP. A new result beyond that limit evicts the
+  oldest result for that IP and records the resulting history gap.
 - Agent identity, configuration, current state, task deduplication, and offline
   queue metadata are stored transactionally in bbolt. Complete JSON bodies are
   root-only immutable files published through sync, atomic rename, and bbolt
   reference commit; startup removes unreferenced files and reports referenced
   missing files as data loss.
 - The Agent separately retains the latest lightweight address state for each
-  egress and at most 30 unuploaded address-transition events per egress.
-  Overflow evicts the oldest event and records a gap without discarding the
-  latest state.
+  hidden discovery path and at most 30 unuploaded address-transition events
+  for each path. Overflow evicts the oldest event and records a node-level gap
+  without discarding the latest state.
 - A complete JSON result is limited to 1 MiB at both Agent capture and center
   ingestion. Invalid or oversized output becomes an explicit failed execution
   with at most 64 KiB of combined redacted diagnostics, not a history
@@ -117,30 +117,37 @@ multi-user collaboration.
 - The product does not provide public result pages.
 - Probes must disable IPQuality's online report generation. Complete reports
   must not be uploaded to `upload.check.place`.
-- Every attempted egress execution downloads a fresh copy of the official
+- Every attempted public-IP execution downloads a fresh copy of the official
   IPQuality entry script. The Agent does not retain a reusable script cache or
   track upstream script revisions; a download failure fails that execution
   explicitly.
-- A managed node may have multiple IPv4 and IPv6 addresses, including
-  environments involving NAT. Automatic discovery alone may not identify
-  every usable probe path.
-- The center automatically creates default IPv4 and IPv6 egresses when the
-  Agent reports corresponding default routes. Additional stable local
-  addresses and interfaces are discovered as candidates that the
-  administrator may enable; discovery does not automatically schedule every
-  address.
-- Agent inventory includes private, CGNAT, global, and IPv6 unique-local
-  source addresses with their interface and lifecycle state. Temporary IPv6
-  privacy addresses are labeled and displayed but are not automatically
-  offered as independent durable egresses. A default IPv6 egress still reports
-  one when the operating system actually selects it.
-- A probe path, rather than a user-entered target IP, is the stable object used
-  for scheduling and history. A path may use the default IPv4 or IPv6 route, a
-  local interface, a local source address, or an HTTP, HTTPS, or SOCKS5 proxy.
+- A managed node may have multiple IPv4 and IPv6 addresses and may use NAT.
+  The center derives hidden discovery paths from usable default routes and
+  stable routable source addresses, then reconciles their observations into
+  canonical public IPv4 and IPv6 addresses.
+- The public IP is the user-visible probe, report, comparison, history, and
+  notification subject. One IP discovered through several interfaces,
+  sources, NAT mappings, proxies, or nodes appears once across the center.
+- A confirmed change to a different canonical IP changes the report subject;
+  reports from different IPs are never combined. If a previously observed IP
+  becomes current again, its existing identity, settings, and retained reports
+  are reused automatically. IPv4-mapped IPv6 values are normalized to IPv4
+  before identity lookup.
+- Interfaces, routes, local source addresses, selectors, and hidden path IDs
+  are execution metadata and are not exposed as independently managed browser
+  objects. Temporary IPv6 privacy addresses are not persisted as separate
+  discovery paths; a default IPv6 path can still observe the public address
+  selected by the operating system.
+- The administrator cannot enter an arbitrary public IP. Every public-IP
+  subject must first be observed through a path on a managed node.
+- Every HTTP, HTTPS, or SOCKS5 proxy belongs to one node and is managed from
+  that node's public-IP interface. After a proxy is added, its Agent
+  automatically attempts lightweight IPv4 and IPv6 discovery through it; the
+  administrator does not select an address family or manage the resulting
+  hidden paths.
 - Authenticated proxy settings are managed at the center and delivered only
-  to Agents whose configured egresses use them. An Agent retains the last
-  accepted credentials locally so scheduled work can continue while the
-  center is unavailable.
+  to their owning Agent. An Agent retains the last accepted credentials
+  locally so scheduled work can continue while the center is unavailable.
 - Proxy passwords are treated as recoverable secrets: the interface can
   replace or clear a password but never reveals the stored value. The center
   and each Agent encrypt retained proxy credentials with an automatically
@@ -149,17 +156,12 @@ multi-user collaboration.
   loopback proxy adapter to IPQuality. The adapter uses the real upstream
   credentials internally so they never appear in the upstream script's
   command-line arguments.
-- Product-facing language may call a probe path a network egress. Each egress
-  has independent current state and history.
-- The public IP observed through a path is a probe result and may change over
-  time.
-- Current egress state shows the effective local interface and source address
-  together with the externally observed address. A translated direct path is
-  displayed as a local-to-public mapping, for example
-  `eth0 · 10.0.0.5 -> 203.0.113.8`, and carries a likely-NAT warning.
+- The center can mark a public IP as likely reached through NAT without
+  exposing the underlying local interface, source address, route, or selector
+  as a product object.
 - On a translated path, the center warns that the unmodified upstream script's
   DNS and raw mail-connectivity subprocesses may use the default route or fail
-  to bind even when its HTTP checks use the selected egress. IPChronicle does
+  to bind even when its HTTP checks use the selected path. IPChronicle does
   not patch those subprocesses or reinterpret their output.
 
 ## Deployment Scope
@@ -230,8 +232,8 @@ multi-user collaboration.
   cookie tokens, CSRF protection, login throttling, and explicit reverse-proxy
   trust configuration.
 - Session cookies are `HttpOnly` and `SameSite=Lax`, and are `Secure` when the
-  configured external origin is HTTPS. Intentional HTTP deployment remains
-  allowed with a visible transport warning.
+  direct or trusted-proxy request scheme is HTTPS. Intentional HTTP deployment
+  remains allowed with a visible transport warning.
 - TOTP secrets are encrypted using the installation-local master key. The
   first release has no TOTP recovery codes because the container-local
   recovery command is the recovery boundary.
@@ -274,51 +276,59 @@ The intended product scope includes:
 - lightweight network-address checks that are separate from complete
   IPQuality probes;
 - native lightweight checks query an ordered set of IP-echo services through
-  the configured egress; an unchanged address needs one successful response,
+  each hidden discovery path; an unchanged address needs one successful response,
   while a first observation or apparent change requires agreement from a
   second independent service before becoming confirmed state;
 - lightweight checks run every 10 minutes by default; the administrator may
   select any positive interval supported by the scheduler, and high-frequency
   warnings do not block saving or execution;
-- after applying a new or materially changed egress configuration, the Agent
-  immediately performs a lightweight check for each affected egress without
+- after applying a new or materially changed discovery-path configuration, the Agent
+  immediately performs a lightweight check for each affected path without
   consuming the node's center-issued task slot; discovery-service changes
-  similarly check every enabled egress;
+  similarly check every active path;
 - unconfirmed or conflicting address responses preserve the last confirmed
   address, produce a visible check failure, and do not trigger a complete
   probe;
-- address-event records only for the first observation, a public-IP change, a
-  check failure, or recovery; repeated unchanged successful checks update
-  current state without appending duplicate records;
+- address-event records only when a public IP first establishes a path
+  baseline, enters or leaves the node's confirmed set, a check fails, or a
+  path recovers; repeated unchanged successful checks update current state
+  without appending duplicate records;
 - registration and the first confirmed address do not run a complete probe;
   the administrator decides whether to use the immediate probe command;
-- recurring complete probing is enabled by default every day at 00:00 in each
-  Agent node's local timezone, while the administrator controls the exact
-  schedule, may select an explicit per-node IANA timezone, and may disable the
+- recurring complete probing is enabled by default every day at 00:00 in the
+  explicit IANA timezone captured from the administrator's browser when the
+  registration key is generated; the administrator controls the exact
+  schedule, may select another per-node IANA timezone, and may disable the
   schedule; schedules are not automatically staggered and Agents may run at
   the same time;
 - complete schedules use a shared six-field Cron format with seconds first;
   the default is `0 0 0 * * *`, and common UI controls generate the same
   expression accepted by the advanced editor;
-- each network egress has an independent "probe after confirmed address
-  change" setting that defaults to enabled; a triggering change starts one
-  node-level complete-probe run for all enabled egresses, while disabling the
-  trigger does not exclude that egress from manual or recurring probes;
+- each public IP has independent complete-probe enablement and is enabled by
+  default when first created;
+- each node has one default-enabled setting for automatic probing when an
+  established confirmed public-IP set gains an address. A first observation
+  on a path does not trigger it. The node-level run contains only newly current
+  enabled IPs after the Agent applies their selected paths. Whether an IP has
+  appeared before only determines history association;
 - complete-probe schedule occurrences missed while the Agent is stopped or
   busy are shown as skipped and are not queued or executed later; applying a
   new schedule starts with its next future occurrence;
-- each started complete probe is one node-level run with a frozen ordered set
-  containing one child execution for every eligible egress; children run
-  sequentially, and a child failure does not prevent later egresses from
-  running;
+- each started complete probe is one node-level run with a frozen ordered
+  target set. Recurring runs contain every enabled public IP whose selected
+  path belongs to the node, manual runs contain the administrator's selected
+  targets, and address-set-change runs contain only newly current enabled IPs;
+  children run sequentially, and one child failure does not prevent later
+  public IPs from running;
 - each child execution starts IPQuality at most once; download, process,
   timeout, invalid-JSON, and oversized-output failures are not retried by
   IPChronicle, while retry behavior internal to the unmodified upstream script
   is left unchanged;
-- trying a failed egress again requires a new run from a later schedule,
-  confirmed address change, or administrator command; idempotent upload of an
-  existing result is data retransmission and never starts another probe;
-- every successful egress execution retains its complete JSON snapshot,
+- trying a failed public IP again requires a new run from a later schedule, a
+  later confirmed transition to that IP, or an administrator command;
+  idempotent upload of an existing result is data retransmission and never
+  starts another probe;
+- every successful public-IP execution retains its complete JSON snapshot,
   including upstream fields that IPChronicle does not yet recognize; failed or
   skipped siblings remain visible without discarding successful snapshots;
 - a run is successful when all children succeed, partially successful when
@@ -330,15 +340,16 @@ The intended product scope includes:
 - the full set of report categories currently produced by IPQuality,
   including network identity, risk databases, proxy and VPN indicators,
   media and service availability, mail connectivity, and DNS blacklists;
-- current results for each node and network egress;
+- current results for each public IP, with the selected node shown as execution
+  provenance;
 - historical snapshots and field-level change views;
 - comparison between results from different points in time;
 - notification rules for result changes;
-- field-level notification rules are evaluated against one successful egress
+- field-level notification rules are evaluated against one successful public-IP
   execution's change set, then all matches for the same sender are aggregated
   into at most one delivery for that execution;
 - Agent and center outages do not change comparison order: retained results
-  are placed by durable per-egress probe order rather than center receipt time,
+  are placed by durable per-public-IP probe order rather than center receipt time,
   and an older delayed result never replaces a newer current result;
 - after reconnection, retained executions are compared in probe order and use
   ordinary notification rules; delayed change deliveries are neither
@@ -348,7 +359,7 @@ The intended product scope includes:
   the center processes it; the first release does not retain historical
   notification-configuration versions or rematch already processed history
   after configuration changes;
-- an egress's first successful complete result establishes its comparison
+- a public IP's first successful complete result establishes its comparison
   baseline and does not generate field-change notifications; the same applies
   after deliberate history-database reconstruction;
 - confirmed address changes, check and probe failure or recovery, and upstream
@@ -375,10 +386,11 @@ The intended product scope includes:
   consume it.
 - explicit visibility when the upstream report no longer matches fields or
   types expected by IPChronicle;
-- structured views read known paths directly from each complete JSON. Missing
-  or incompatible values display as unavailable and produce format-mismatch
-  state; the first release has no versioned interpretation cache or generic
-  type coercion;
+- structured views read known paths directly from each complete JSON. An
+  explicit JSON `null` displays as unavailable data without producing a format
+  mismatch. Missing paths and incompatible non-null values display as
+  unavailable and do produce format-mismatch state; the first release has no
+  versioned interpretation cache or generic type coercion;
 - ordinary field comparison and notifications require compatible values in
   both snapshots, so format failures and recovery do not also appear as
   semantic field changes;
@@ -391,10 +403,11 @@ The intended product scope includes:
   treating that number as a hard product limit.
 - The default and typical complete-probe schedule is once per day, while the
   user remains free to configure a different frequency under ADR 0004.
-- A typical node has two network egresses: default IPv4 and default IPv6.
-  First-release capacity validation should cover up to six egresses per node.
+- A typical node discovers one IPv4 and one IPv6 public address.
+  First-release capacity validation should cover up to six distinct public
+  addresses per node and global deduplication across nodes.
 - The upper validation scenario is therefore approximately 70 nodes and 420
-  independently monitored egresses. At one complete probe per day, this is
+  independently monitored public IPs. At one complete probe per day, this is
   approximately 153,000 complete snapshots per year.
 - History retention must support indefinite retention, retention by age in
   days, and retention by a configured data-size budget across snapshots, runs,
@@ -482,3 +495,4 @@ runtime-downloaded IPQuality script retain their own licenses and notices.
 - [ADR 0047: Use official shadcn/ui components](decisions/0047-use-shadcn-ui-components.md)
 - [ADR 0048: Support Simplified Chinese and English](decisions/0048-support-chinese-and-english.md)
 - [ADR 0049: Use Vite for the web build](decisions/0049-use-vite-for-the-web-build.md)
+- [ADR 0055: Scope network proxies to nodes and discover both address families](decisions/0055-scope-network-proxies-to-nodes.md)

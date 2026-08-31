@@ -43,7 +43,7 @@ addresses and does not publish anonymous result pages.
           |                       |
    root Agent on node A     root Agent on node N
           |                       |
-   local egresses and       local egresses and
+   hidden paths and         hidden paths and
    IPQuality child process  IPQuality child process
 ```
 
@@ -68,7 +68,7 @@ The center is a modular monolith with explicit internal ownership for:
 - desired Agent configuration and revision synchronization;
 - the single center-issued task slot for each node;
 - result validation, idempotent ingestion, and current state;
-- complete-probe runs, per-egress executions and snapshots, address events,
+- complete-probe runs, per-public-IP executions and snapshots, address events,
   comparison, and retention;
 - notification rules, durable delivery state, and sender execution; and
 - embedded database migration and local operator commands.
@@ -87,16 +87,16 @@ ORM-managed schema; transactions remain explicit and belong to one database.
 The Agent owns node-local behavior that must continue without the center:
 
 - interface, route, and source-address inventory;
-- lightweight public-address checks through configured network egresses;
+- lightweight public-address checks through hidden discovery paths;
 - local recurring schedules and address-change triggers;
-- serialized complete probing of all enabled egresses;
+- serialized complete probing of all enabled public IPs selected for that node;
 - durable application of complete configuration snapshots;
 - bounded offline result storage and idempotent replay;
 - task acknowledgement and execution deduplication; and
 - administrator-triggered self-update with executable-and-local-state
   failed-start rollback.
 
-IPQuality runs as a fresh root child process for each egress execution. A
+IPQuality runs as a fresh root child process for each public-IP execution. A
 JavaScript notification sender runs in a separate short-lived center child
 process with a fresh embedded goja runtime. JavaScript state is not reused
 between deliveries, and the worker does not load Node.js compatibility or an
@@ -135,6 +135,12 @@ Raw probe data, diagnostics, and structured integration payloads remain
 language-neutral, while IPChronicle-owned human-readable notifications use the
 saved administrator locale.
 
+Complete-probe schedules store explicit IANA timezone names. Generating or
+rotating the reusable Agent registration key captures the administrator
+browser's current IANA timezone, and nodes registered with that key use it for
+their default daily schedule. Per-node schedule editing uses a searchable IANA
+timezone selector; Agent-host-local sentinel values are not accepted.
+
 Both HTTP surfaces are contract-first OpenAPI 3.1 JSON APIs. The OpenAPI source
 generates Go transport types and Agent clients plus TypeScript path and
 component types. The frontend uses those types through `openapi-fetch` over
@@ -153,23 +159,30 @@ state remain explicit center responsibilities.
 ## Core Domain Boundaries
 
 A **node** is one registered Agent identity and its host inventory. A
-**network egress** is a durable path from that node, selected by default route,
-interface, source address, or HTTP, HTTPS, or SOCKS5 proxy. An egress is not a
-manually entered target IP.
+**discovery path** is hidden execution metadata derived from a usable route,
+stable local source, or explicit HTTP, HTTPS, or SOCKS5 proxy. A **public
+address** is the canonical IPv4 or IPv6 value observed through one or more
+paths and is the user-visible probe, report, comparison, history, and
+notification subject. It cannot be entered manually.
 
-The public IP observed through an egress is changing result state. For a
-translated path, current state keeps both the local selector and observed
-public address, such as `eth0 · 10.0.0.5 -> 203.0.113.8`, and marks likely NAT.
+Public addresses are globally unique within the center. The same address seen
+through several nodes, interfaces, NAT mappings, or proxies has one identity;
+IPv4-mapped IPv6 is normalized to IPv4. A confirmed transition to a different
+IP changes the report subject. If an older IP becomes current again, canonical
+lookup reuses its identity, settings, and history automatically.
 
-Automatic discovery creates default IPv4 and IPv6 egresses when usable routes
-exist. Other stable addresses and interfaces are candidates that require
-administrator enablement. Temporary IPv6 privacy addresses remain visible but
-are not automatically made independent durable egresses.
+The center automatically creates hidden paths for usable default IPv4 and IPv6
+routes and stable routable sources. Temporary IPv6 privacy sources do not
+become independent paths. A proxy belongs to one node; after it is configured,
+the Agent automatically attempts IPv4 and IPv6 discovery and maintains the
+corresponding hidden path state. Browser APIs expose the node-owned proxy and
+its per-family availability, not interfaces, routes, sources, selectors, or
+path UUIDs.
 
-Disabling a node or egress preserves configuration and history while stopping
-its probe work. Permanent deletion removes owned configuration and history;
-node deletion also revokes the Agent identity. Cross-database deletion is a
-persisted, visible, idempotent operation rather than a claimed atomic commit.
+Disabling a node stops its probe work and preserves data. Deleting a node
+revokes its Agent identity and removes node configuration, hidden paths, and
+node-level state, but does not delete globally identified public IPs, their
+reports, starred snapshots, or address events already assigned to them.
 
 ## Control And Data Flows
 
@@ -190,10 +203,17 @@ persisted, visible, idempotent operation rather than a claimed atomic commit.
    current snapshot, validates and persists it atomically, then reports the
    applied revision. Invalid configuration leaves the previous snapshot active.
 
+The host-local uninstall command removes the Agent services and binaries but
+preserves its state by default so a reinstall retains the node identity and
+offline queue. An explicit purge additionally removes the state directory and
+causes the next installation to create a new node. Neither host-local mode
+deletes the node or its history from the center, and center-side deletion does
+not claim to remove root-owned host software.
+
 The snapshot includes the current history generation. After an operator
 recreates `history.db`, the center advances that generation, Agents discard
-older-generation queued observations when they apply it, and each enabled
-egress receives a fresh lightweight address check. Old queued history can
+older-generation queued observations when they apply it, and each active
+discovery path receives a fresh lightweight address check. Old queued history can
 neither repopulate the replacement database nor trigger an automatic complete
 probe.
 
@@ -204,19 +224,25 @@ to ordinary polling.
 
 ### Lightweight Address Observation
 
-1. The Agent checks each enabled egress every ten minutes by default, or at
+1. The Agent checks each active discovery path every ten minutes by default, or at
    the positive interval chosen by the administrator.
-2. It queries an ordered set of public IP echo services through that egress.
+2. It queries an ordered set of public IP echo services through that path.
    A first observation or suspected change requires a second independent
    service to agree.
-3. Confirmed state records the effective interface, local source, observed
-   public address, and likely translation. Unchanged success updates current
-   state without appending history.
+3. Confirmed path state records the observed canonical public address and NAT
+   evidence. The center reconciles every path observation into the global
+   public-address registry. Unchanged success updates current state without
+   appending history.
 4. First observation, confirmed change, failure, and recovery append address
    events. Unconfirmed or conflicting responses preserve the previous
    confirmed address and expose a failure.
-5. A confirmed change may trigger one node-level complete probe when that
-   egress's default-enabled setting allows it. First observation never does.
+5. A newly discovered public IP is enabled for complete probing by default.
+   Each node has one default-enabled automatic new-address policy. The Agent
+   derives a deduplicated confirmed IP set from its hidden path observations;
+   failures do not alter that baseline. A first observation on a path never
+   triggers the policy. Later additions start a run containing only newly
+   current enabled IPs after the Agent applies their selected paths. Prior
+   appearances affect only canonical history association.
 
 Registration itself and the first confirmed address do not run a complete
 probe.
@@ -225,20 +251,23 @@ probe.
 
 1. A complete probe starts from a local schedule, a confirmed-address-change
    trigger, or an administrator command accepted by an online Agent.
-2. The Agent creates one stable node-level run, freezes its applied
-   configuration revision and ordered eligible egress set, and assigns a stable
-   child execution identity to each egress. One node runs at most one such run;
+2. The Agent creates one stable node-level run and freezes its applied
+   configuration revision and ordered target set. A recurring run targets all
+   enabled public IPs whose selected paths belong to the node, a manual run
+   targets the administrator's selection, and an address-set-change run
+   targets only newly current enabled IPs. Each target receives a stable child execution
+   identity. One node runs at most one such run;
    overlapping or missed occurrences are visible and never queued for catch-up.
 3. Child executions run sequentially. Failure or skip of one child does not
-   discard successful siblings or stop a later eligible egress.
-4. For each attempted egress, the Agent downloads a fresh official IPQuality
+   discard successful siblings or stop a later eligible public IP.
+4. For each attempted public IP, the Agent downloads a fresh official IPQuality
    entry script and executes it unchanged with JSON and privacy options plus
-   the required egress selector. The script is neither cached nor
+   the required hidden path selector. The script is neither cached nor
    version-pinned. Each child permits only one Agent-launched IPQuality process;
    download, process, timeout, invalid-JSON, or oversized-output failure ends
    that child without an IPChronicle retry. Upstream-internal behavior remains
    unchanged.
-5. Valid JSON of at most 1 MiB becomes that egress execution's complete source
+5. Valid JSON of at most 1 MiB becomes that public-IP execution's complete source
    snapshot. Invalid or oversized output becomes an explicit failure with at
    most 64 KiB of redacted diagnostics.
 6. The Agent uploads the run manifest, child outcomes and results, and terminal
@@ -255,16 +284,17 @@ probe.
    child again and terminates any surviving old probe process tree before
    normal scheduling resumes.
 
-A failed egress is attempted again only in a new run started by a later
-schedule, confirmed address change, or administrator command. The first
-release does not expose an automatic execution-retry count.
+A failed public IP is attempted again only in a new run started by a later
+schedule, a later confirmed transition to that IP, or an administrator
+command. The first release does not expose an automatic execution-retry count.
 
-Known report fields are read directly from fixed JSON paths and types. Missing
-or incompatible values are unavailable structured data and a visible format
-mismatch, not silently coerced values. The complete JSON, including unknown
-fields, remains the source result.
+Known report fields are read directly from fixed JSON paths and types. An
+explicit JSON `null` is unavailable data rather than a format mismatch. Missing
+paths and incompatible non-null values are unavailable structured data and a
+visible format mismatch, not silently coerced values. The complete JSON,
+including unknown fields, remains the source result.
 
-For interface, source-address, and translated egresses, some unmodified
+For interface, source-address, and translated paths, some unmodified
 IPQuality DNS and raw mail-connectivity subprocesses may still use the default
 route or fail to bind even when its HTTP checks use the selected path. The
 center exposes this limitation and preserves the upstream output; it does not
@@ -295,11 +325,11 @@ lost response from repeating privileged work.
 ### Notifications
 
 The center evaluates field rules against one complete snapshot's change set.
-All matching changes for the same egress and sender are aggregated into at
+All matching changes for the same public IP and sender are aggregated into at
 most one delivery. The first successful snapshot establishes a baseline and
 does not emit field-change notifications.
 
-Every execution carries durable order within its egress. Current state and
+Every execution carries durable order within its public IP. Current state and
 preceding-result comparison use that order rather than center receipt time or
 wall-clock sorting, so a delayed older upload cannot roll current state back.
 The center may store artifacts arriving out of order but waits for the prior
@@ -324,12 +354,13 @@ Webhook, and isolated JavaScript senders are supported; SMTP is not.
 ## Persistence Ownership
 
 `config.db` stores administrator and session state, Agent identities and
-credential digests, desired configuration, egress and proxy configuration,
-task state, notification configuration, retention settings, and system
-configuration. It also owns the current opaque history generation.
+credential digests, desired configuration, public-address settings, hidden
+path mappings and node-owned proxy configuration, task state, notification
+configuration, retention settings, and system configuration. It also owns the
+current opaque history generation.
 
 `history.db` stores current observed results, node-level complete-probe runs,
-per-egress executions and complete JSON snapshots, address events,
+per-public-IP executions and complete JSON snapshots, address events,
 report-format state, notification delivery history, and reported gaps. It is
 the only copy of current probe results.
 Deleting it while the center is stopped intentionally resets all observed
@@ -356,9 +387,9 @@ large bbolt values. File publication uses sync, atomic rename, directory sync,
 and a committed metadata reference. Startup removes unreferenced files and
 treats referenced missing files as explicit data loss.
 
-The Agent keeps at most 30 unuploaded complete results and 30 unuploaded
-address-transition events per egress, while retaining the latest address state
-separately. Eviction records a visible history gap. Center acceptance commits
+The Agent keeps at most 30 unuploaded complete results per public IP and 30
+unuploaded address-transition events per discovery path, while retaining the
+latest path state separately. Eviction records a visible history gap. Center acceptance commits
 metadata removal before the corresponding result file is deleted, so an
 ambiguous upload response cannot discard a result that still needs confirmed
 acceptance.
@@ -403,8 +434,9 @@ complete recoverable copy.
 
 ## Capacity And Availability
 
-The validation target is approximately 70 nodes and up to six egresses per
-node, or about 420 monitored egresses. The typical complete-probe frequency is
+The validation target is approximately 70 nodes and up to six distinct public
+IPs per node, or about 420 monitored public IPs before global deduplication.
+The typical complete-probe frequency is
 once per day, but product policy does not limit a user-selected frequency or
 stagger equal schedules.
 

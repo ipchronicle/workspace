@@ -1,6 +1,6 @@
 # ADR 0004: Separate address checks from complete probes
 
-Status: Accepted
+Status: Accepted (automatic address-set policy partially superseded by ADR 0059; timezone policy superseded by ADR 0060)
 
 Date: 2026-08-06
 
@@ -29,11 +29,7 @@ the complete upstream probe.
   complete probe. The administrator can use the immediate complete-probe
   command when an initial result is wanted.
 - Recurring complete probing is enabled by default with a daily schedule at
-  00:00 in the Agent node's local timezone. The administrator controls the
-  exact schedule and can disable or replace it.
-- The interface always displays the schedule timezone. The administrator may
-  keep the Agent-local timezone behavior or select an explicit IANA timezone
-  independently for each node.
+  00:00. ADR 0060 defines the explicit timezone default and selection model.
 - A complete-probe schedule uses one six-field Cron expression in the order
   second, minute, hour, day of month, month, and day of week. The default daily
   schedule is `0 0 0 * * *`.

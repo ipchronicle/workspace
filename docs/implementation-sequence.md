@@ -110,7 +110,8 @@ Deliver:
 - one-command root installer with pre-mutation distribution and architecture
   checks for systemd and OpenRC;
 - reusable registration-key enrollment, node-specific credential digests,
-  revocation, reinstallation identity preservation, and node inventory;
+  revocation, reinstallation identity preservation, preserving uninstall,
+  explicit local-state purge, and node inventory;
 - 30-second authenticated polling, two-minute online state, capability
   negotiation, and complete desired-configuration snapshots;
 - atomic bbolt state for identity, applied revision, current configuration,
@@ -125,29 +126,36 @@ Exit criteria:
 
 - one command creates exactly one node and starts a root service on every
   supported init path;
+- host-local uninstall removes services and binaries while preserving state by
+  default, and an explicit purge also removes that state;
 - restart and center outage preserve the last accepted configuration;
 - invalid snapshots never replace valid local state; and
 - an Agent can be disabled, revoked, or permanently deleted without silently
   recreating its identity.
 
-## Phase 3: Network Egress And Lightweight Observation
+## Phase 3: Public-IP Discovery And Lightweight Observation
 
 Create the first useful monitoring slice before integrating the expensive
 upstream probe.
 
 Deliver:
 
-- interface, route, address, lifecycle, and default IPv4/IPv6 inventory;
-- durable default and administrator-enabled egresses for route, interface,
-  source address, HTTP/HTTPS proxy, and SOCKS5 proxy selectors;
-- center-managed encrypted proxy credentials and the Agent's native proxy use;
+- internal interface, route, address, lifecycle, and default IPv4/IPv6
+  inventory;
+- automatic hidden paths for usable defaults and stable routable sources, plus
+  node-owned HTTP, HTTPS, and SOCKS5 proxies that automatically attempt hidden
+  IPv4 and IPv6 discovery;
+- a globally deduplicated canonical public-IP registry with IPv4-mapped IPv6
+  normalization, path availability, and selected execution-node ownership;
+- center-managed, node-scoped encrypted proxy credentials and the Agent's
+  native proxy use;
 - native bounded IP-echo discovery with second-provider confirmation for first
   observations and suspected changes;
-- current local-to-public mappings, likely-NAT and temporary-IPv6 labels,
+- public-IP availability, likely-NAT and proxy-path labels,
   address transitions, failure and recovery, offline event buffering, and
   explicit gaps; and
-- egress inventory, configuration, current address, NAT, unavailable-selector,
-  and transition-history UI workflows.
+- public-IP probe settings, node-scoped proxy management, NAT indication, and
+  transition-history UI workflows without exposing automatic paths.
 
 Exit criteria:
 
@@ -164,26 +172,26 @@ Implement the core report workflow end to end.
 
 Deliver:
 
-- stable node-level run and per-egress execution identities, frozen egress
-  membership, durable per-egress order, and success/partial/failure summaries;
+- stable node-level run and per-public-IP execution identities, frozen target
+  membership, durable per-public-IP order, and success/partial/failure summaries;
 - local daily and Cron scheduling, confirmed-address-change triggers, one
   active run per node, skipped overlaps, and no catch-up;
 - the one-slot immediate complete-probe task with acknowledgement, expiry,
   progress, no cancellation, terminal deduplication, and run linkage;
-- fresh official IPQuality download per attempted egress, root process-tree
+- fresh official IPQuality download per attempted public IP, root process-tree
   supervision, required `-n`, `-j`, and `-p` behavior, loopback credential
   adapter, timeout and one-attempt semantics;
 - 1 MiB JSON and 64 KiB redacted-diagnostic boundaries, immutable result files,
-  bbolt publication, bounded per-egress queues, restart reconciliation, and
+  bbolt publication, bounded per-public-IP result queues, restart reconciliation, and
   obsolete-generation cleanup;
 - idempotent out-of-order center ingestion, raw JSON and current-result storage,
   history generation reset, and task/run separation; and
-- manual probe, schedule, run progress, per-egress outcome, raw result, warning,
+- manual probe, schedule, run progress, per-public-IP outcome, raw result, warning,
   and history-reset UI states.
 
 Exit criteria:
 
-- multi-egress partial success preserves successful siblings and current state;
+- multi-IP partial success preserves successful siblings and current state;
 - duplicate and reordered uploads cannot duplicate or roll back results;
 - Agent restart interrupts exactly one running child, skips unstarted children,
   terminates the old process tree, and never executes that run again;
@@ -191,7 +199,7 @@ Exit criteria:
 - live upstream smoke testing is separate from deterministic merge fixtures.
 
 This phase produces the earliest useful internal build: an owner can install an
-Agent, discover an egress, run or schedule a complete probe, and inspect its raw
+Agent, discover a public IP, enable it, run or schedule a complete probe, and inspect its raw
 current result. It is not yet the complete public first release.
 
 ## Phase 5: History, Interpretation, And Retention
@@ -202,7 +210,7 @@ Deliver:
 
 - the fixed known-field catalog with direct typed reads and explicit missing,
   incompatible, and unknown-field format state;
-- chronological per-egress comparison independent of receipt time, arbitrary
+- chronological per-public-IP comparison independent of receipt time, arbitrary
   snapshot comparison, and first-result baselines;
 - indefinite, age, and logical-size retention across every history category,
   with starred-snapshot protection and current/active-state exemptions;
