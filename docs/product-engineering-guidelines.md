@@ -57,7 +57,7 @@ Date: 2026-08-07
   schema 只服务交互体验，不能取代 OpenAPI 传输契约或 center 的最终校验。
 - 所有 IPChronicle 自有可见文本、表单反馈、空状态、错误、tooltip 和无障碍
   标签使用 ADR 0048 的翻译资源。不得先硬编码一种语言再把翻译留作清理任务。
-- 原始 IPQuality JSON、诊断和用户内容保持原值；本地化标签不能伪装成原始
+- 原始完整探测 JSON、诊断和用户内容保持原值；本地化标签不能伪装成原始
   数据的一部分。
 - 组件应覆盖 loading、empty、offline、partial success、failure、recovery 和
   destructive confirmation 等所属工作流真实存在的状态。

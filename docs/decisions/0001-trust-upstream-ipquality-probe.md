@@ -1,6 +1,6 @@
 # ADR 0001: Trust the upstream IPQuality probe
 
-Status: Accepted
+Status: Superseded by ADR 0063
 
 Date: 2026-08-06
 

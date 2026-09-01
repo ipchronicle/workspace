@@ -1,6 +1,6 @@
 # ADR 0019: Require 256 MiB on Agent nodes
 
-Status: Accepted
+Status: Superseded by ADR 0063
 
 Date: 2026-08-06
 

@@ -44,7 +44,7 @@ addresses and does not publish anonymous result pages.
    root Agent on node A     root Agent on node N
           |                       |
    hidden paths and         hidden paths and
-   IPQuality child process  IPQuality child process
+   built-in Go probe        built-in Go probe
 ```
 
 The supported center deployment is Linux with Docker Compose. The center does
@@ -97,14 +97,14 @@ The Agent owns node-local behavior that must continue without the center:
 - administrator-triggered self-update with executable-and-local-state
   failed-start rollback.
 
-IPQuality runs as a fresh root child process for each public-IP execution. A
-JavaScript notification sender runs in a separate short-lived center child
-process with a fresh embedded goja runtime. JavaScript state is not reused
-between deliveries, and the worker does not load Node.js compatibility or an
-event loop. The center starts at most one JavaScript worker globally; pending
-real and test deliveries wait in durable state. Telegram and fixed Webhook
-execution do not consume this slot. Neither child process is an independently
-deployed service.
+The complete probe runs in-process in the root Agent for each public-IP
+execution. A JavaScript notification sender runs in a separate short-lived
+center child process with a fresh embedded goja runtime. JavaScript state is
+not reused between deliveries, and the worker does not load Node.js
+compatibility or an event loop. The center starts at most one JavaScript
+worker globally; pending real and test deliveries wait in durable state.
+Telegram and fixed Webhook execution do not consume this slot. The JavaScript
+child process is not an independently deployed service.
 
 ### Web Interface
 
@@ -145,7 +145,7 @@ timezone selector; Agent-host-local sentinel values are not accepted.
 Both HTTP surfaces are contract-first OpenAPI 3.1 JSON APIs. The OpenAPI source
 generates Go transport types and Agent clients plus TypeScript path and
 component types. The frontend uses those types through `openapi-fetch` over
-native Fetch rather than generating a per-operation SDK. Complete IPQuality
+native Fetch rather than generating a per-operation SDK. Complete-probe
 documents remain bounded arbitrary JSON inside typed upload envelopes. The
 first release has no parallel gRPC transport.
 
@@ -265,13 +265,10 @@ probe.
    overlapping or missed occurrences are visible and never queued for catch-up.
 3. Child executions run sequentially. Failure or skip of one child does not
    discard successful siblings or stop a later eligible public IP.
-4. For each attempted public IP, the Agent downloads a fresh official IPQuality
-   entry script and executes it unchanged with JSON and privacy options plus
-   the required hidden path selector. The script is neither cached nor
-   version-pinned. Each child permits only one Agent-launched IPQuality process;
-   download, process, timeout, invalid-JSON, or oversized-output failure ends
-   that child without an IPChronicle retry. Upstream-internal behavior remains
-   unchanged.
+4. For each attempted public IP, the Agent invokes its built-in Go probe once
+   with the required hidden execution path. Fatal engine, timeout, invalid-JSON,
+   or oversized-output failure ends that child without an IPChronicle retry.
+   The probe version changes only with an IPChronicle Agent release.
 5. Valid JSON of at most 1 MiB becomes that public-IP execution's complete source
    snapshot. Invalid or oversized output becomes an explicit failure with at
    most 64 KiB of redacted diagnostics.
@@ -279,15 +276,15 @@ probe.
    summary with stable identities. The center accepts retransmission and
    out-of-order arrival idempotently, commits successful children independently,
    and waits for the terminal summary before deriving the parent state. This
-   retransmission reuses existing identities and never reruns IPQuality.
+   retransmission reuses existing identities and never reruns the probe.
 7. All-success produces a successful run, mixed success and non-success
    produces partial success, and a terminal run with no successful child is
    failed.
 8. After an Agent restart, committed children remain terminal, the previously
    running child becomes interrupted, and unstarted children become skipped.
    The Agent rebuilds the same run's terminal summary without executing any
-   child again and terminates any surviving old probe process tree before
-   normal scheduling resumes.
+   child again. Cancellation of the old Agent process terminates its in-process
+   network work.
 
 A failed public IP is attempted again only in a new run started by a later
 schedule, a later confirmed transition to that IP, or an administrator
@@ -299,11 +296,11 @@ paths and incompatible non-null values are unavailable structured data and a
 visible format mismatch, not silently coerced values. The complete JSON,
 including unknown fields, remains the source result.
 
-For interface, source-address, and translated paths, some unmodified
-IPQuality DNS and raw mail-connectivity subprocesses may still use the default
-route or fail to bind even when its HTTP checks use the selected path. The
-center exposes this limitation and preserves the upstream output; it does not
-patch the script or rewrite a failed subtest as successful.
+HTTP, HTTPS, and SMTP checks use the selected direct, source-bound,
+interface-bound, or proxy path. DNS resolution, media DNS classification, MX
+lookup, and DNSBL lookup use the node's resolver, so they can follow the
+default DNS path even when HTTP traffic uses another egress. The center
+exposes this limitation and does not rewrite a failed subtest as successful.
 
 ### Center-Issued Tasks
 
@@ -431,8 +428,9 @@ complete recoverable copy.
 - The only network host API is synchronous `ipchronicle.http.request()`.
   Sequential calls block only the short-lived worker; the host provides no
   asynchronous I/O, timers, or event loop.
-- The official IPQuality source is trusted executable code and runs as root.
-  Compromise of that official source is outside the threat model.
+- The built-in complete probe runs inside the root Agent. Its network inputs
+  and third-party responses are untrusted and bounded; changing its code
+  requires an Agent release and ordinary source review.
 - Official IPChronicle GitHub Releases and HTTPS delivery are trusted for
   Agent updates. SHA-256 and length checks detect corruption or selection
   errors, not compromise of the official release pipeline.
@@ -447,10 +445,10 @@ stagger equal schedules.
 
 The center baseline is 1 vCPU and 512 MiB excluding retained-history disk and
 unrelated colocated services. Agent idle RSS targets at most 32 MiB, while a
-supported node needs at least 256 MiB physical memory for complete IPQuality
-probing. Below that threshold, complete probes are automatically paused by
-default while lightweight checks continue; the administrator may explicitly
-override the warning.
+supported node needs at least 64 MiB physical memory for complete probing.
+Below that threshold, complete probes are automatically paused by default
+while lightweight checks continue; the administrator may explicitly override
+the warning.
 
 A center outage may create planned downtime, but Agents continue their last
 accepted local schedules and bounded buffering. The first release does not
@@ -478,7 +476,7 @@ previous version, or before the new version is committed healthy.
 Every release tests the distribution matrix defined by ADR 0017, both AMD64
 and ARM64 artifacts, systemd and OpenRC lifecycle, upgrade and Agent rollback,
 database migrations, cross-version contracts, core browser workflows,
-security redaction, a live upstream probe, and the accepted capacity scenario.
+security redaction, a live built-in probe, and the accepted capacity scenario.
 
 ## Deferred Implementation Decisions
 

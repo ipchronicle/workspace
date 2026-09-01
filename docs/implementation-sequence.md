@@ -135,8 +135,8 @@ Exit criteria:
 
 ## Phase 3: Public-IP Discovery And Lightweight Observation
 
-Create the first useful monitoring slice before integrating the expensive
-upstream probe.
+Create the first useful monitoring slice before integrating the complete
+probe.
 
 Deliver:
 
@@ -178,9 +178,9 @@ Deliver:
   active run per node, skipped overlaps, and no catch-up;
 - the one-slot immediate complete-probe task with acknowledgement, expiry,
   progress, no cancellation, terminal deduplication, and run linkage;
-- fresh official IPQuality download per attempted public IP, root process-tree
-  supervision, required `-n`, `-j`, and `-p` behavior, loopback credential
-  adapter, timeout and one-attempt semantics;
+- built-in Go execution per attempted public IP, selected-path HTTP and SMTP,
+  node-resolver DNS behavior, loopback credential adapter, timeout and
+  one-attempt semantics;
 - 1 MiB JSON and 64 KiB redacted-diagnostic boundaries, immutable result files,
   bbolt publication, bounded per-public-IP result queues, restart reconciliation, and
   obsolete-generation cleanup;
@@ -194,9 +194,10 @@ Exit criteria:
 - multi-IP partial success preserves successful siblings and current state;
 - duplicate and reordered uploads cannot duplicate or roll back results;
 - Agent restart interrupts exactly one running child, skips unstarted children,
-  terminates the old process tree, and never executes that run again;
+  and never executes that run again;
 - deleting `history.db` cannot be undone by an older offline queue; and
-- live upstream smoke testing is separate from deterministic merge fixtures.
+- live complete-probe smoke testing is separate from deterministic provider
+  fixtures.
 
 This phase produces the earliest useful internal build: an owner can install an
 Agent, discover a public IP, enable it, run or schedule a complete probe, and inspect its raw
@@ -281,7 +282,7 @@ Exit criteria:
 - a failed Agent update cannot strand an unreadable local schema or lose queued
   results;
 - tagged artifacts pass native AMD64 and ARM64, systemd and OpenRC, supported
-  distribution, 256 MiB probe, 512 MiB center, and 70-node/420-egress gates;
+  distribution, 64 MiB probe, 512 MiB center, and 70-node/420-egress gates;
 - forward-only center migration and Agent rollback behavior are accurately
   documented; and
 - the exact tagged source produces every official artifact and its traceable

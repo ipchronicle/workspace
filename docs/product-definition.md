@@ -46,10 +46,9 @@ multi-user collaboration.
   explicitly by the installer and are not run through emulation.
 - Agent executables are built without CGO as one portable artifact per
   architecture across the supported glibc and musl distributions.
-- A managed node needs at least 256 MiB of physical memory for first-release
-  support. A 64 MiB node is outside the support boundary because the complete
-  upstream probe can exhaust that limit during its parallel DNSBL stage.
-- The installer still installs and registers an Agent below 256 MiB. The Agent
+- A managed node needs at least 64 MiB of physical memory for first-release
+  complete-probe support.
+- The installer still installs and registers an Agent below 64 MiB. The Agent
   continues lightweight address checks, but all complete probes, including
   immediate commands, are paused by default and the center displays the memory
   warning. The administrator can explicitly enable complete probes for that
@@ -109,18 +108,16 @@ multi-user collaboration.
   follows stable versions by default and may explicitly opt into the RC
   channel for both center and Agent update discovery.
 - Agent installation requires root, and the installed Agent service runs as
-  root. The installer provisions IPQuality's system dependencies; runtime
-  probes use IPQuality's `-n` option so the downloaded script cannot invoke a
-  package manager.
+  root. The built-in complete probe does not invoke a package manager or
+  require Bash, `bc`, `dig`, `nc`, or `iproute2`.
 - The product does not provide arbitrary IP lookup detached from a managed
   node.
 - The product does not provide public result pages.
-- Probes must disable IPQuality's online report generation. Complete reports
-  must not be uploaded to `upload.check.place`.
-- Every attempted public-IP execution downloads a fresh copy of the official
-  IPQuality entry script. The Agent does not retain a reusable script cache or
-  track upstream script revisions; a download failure fails that execution
-  explicitly.
+- Complete reports remain inside IPChronicle and are not uploaded to
+  `upload.check.place` or another report-hosting service.
+- Every attempted public-IP execution invokes the Agent's built-in Go probe
+  once. Probe implementation changes are delivered only in an IPChronicle
+  Agent release.
 - A managed node may have multiple IPv4 and IPv6 addresses and may use NAT.
   The center derives hidden discovery paths from usable default routes and
   stable routable source addresses, then reconciles their observations into
@@ -153,16 +150,15 @@ multi-user collaboration.
   and each Agent encrypt retained proxy credentials with an automatically
   generated installation-local master key.
 - For an authenticated proxy probe, the Agent exposes an execution-scoped
-  loopback proxy adapter to IPQuality. The adapter uses the real upstream
-  credentials internally so they never appear in the upstream script's
-  command-line arguments.
+  loopback proxy adapter to its built-in probe. The adapter uses the real
+  upstream credentials internally so they never appear in process arguments.
 - The center can mark a public IP as likely reached through NAT without
   exposing the underlying local interface, source address, route, or selector
   as a product object.
-- On a translated path, the center warns that the unmodified upstream script's
-  DNS and raw mail-connectivity subprocesses may use the default route or fail
-  to bind even when its HTTP checks use the selected path. IPChronicle does
-  not patch those subprocesses or reinterpret their output.
+- HTTP, HTTPS, and SMTP checks use the selected path. DNS resolution, media DNS
+  classification, MX lookup, and DNSBL lookup use the node's resolver and may
+  follow its default DNS path. The center exposes this boundary and does not
+  reinterpret a failed check as successful.
 
 ## Deployment Scope
 
@@ -203,7 +199,7 @@ multi-user collaboration.
 - A history generation stored with configuration prevents offline Agent queues
   from repopulating a deliberately recreated history database. Applying a new
   generation discards obsolete queued observations and runs fresh lightweight
-  checks, but does not automatically run IPQuality.
+  checks, but does not automatically run a complete probe.
 - Center persistence uses explicit parameterized SQL through `database/sql`
   and `sqlc` generated typed query methods. Ordered SQL migrations are the
   schema source and are embedded and applied with goose; the first release does
@@ -249,8 +245,8 @@ multi-user collaboration.
   the configuration database and English is the final fallback for an
   unsupported browser locale.
 - IPChronicle-owned interface and human-readable built-in notification copy is
-  localized. Raw IPQuality JSON, user-provided content, operational diagnostics,
-  and language-neutral integration payloads remain unmodified.
+  localized. Raw complete-probe JSON, user-provided content, operational
+  diagnostics, and language-neutral integration payloads remain unmodified.
 
 ## Required Capabilities
 
@@ -273,8 +269,7 @@ The intended product scope includes:
   Agent disconnects; terminal task state is retained by the center for 30 days,
   while the Agent retains handled-task identity until center confirmation and
   for 24 hours afterward;
-- lightweight network-address checks that are separate from complete
-  IPQuality probes;
+- lightweight network-address checks that are separate from complete probes;
 - native lightweight checks query an ordered set of IP-echo services through
   each hidden discovery path; an unchanged address needs one successful response,
   while a first observation or apparent change requires agreement from a
@@ -325,10 +320,9 @@ The intended product scope includes:
   change persistent enablement;
   children run sequentially, and one child failure does not prevent later
   public IPs from running;
-- each child execution starts IPQuality at most once; download, process,
+- each child execution invokes the built-in probe at most once; provider,
   timeout, invalid-JSON, and oversized-output failures are not retried by
-  IPChronicle, while retry behavior internal to the unmodified upstream script
-  is left unchanged;
+  IPChronicle;
 - trying a failed public IP again requires a new run from a later schedule, a
   later confirmed transition to that IP, or an administrator command;
   idempotent upload of an existing result is data retransmission and never
@@ -341,8 +335,8 @@ The intended product scope includes:
   succeeds;
 - an Agent restart never resumes an active run: committed child results remain,
   the in-progress child becomes interrupted, unstarted children become skipped,
-  and the same run is finalized without repeating upstream execution;
-- the full set of report categories currently produced by IPQuality,
+  and the same run is finalized without repeating probe execution;
+- the complete report categories derived from the accepted IPQuality baseline,
   including network identity, risk databases, proxy and VPN indicators,
   media and service availability, mail connectivity, and DNS blacklists;
 - current results for each public IP, with the selected node shown as execution
@@ -446,12 +440,13 @@ The intended product scope includes:
 ## Licensing
 
 IPChronicle product source is released under `AGPL-3.0-only`. The license does
-not use the "or any later version" option. Third-party components and the
-runtime-downloaded IPQuality script retain their own licenses and notices.
+not use the "or any later version" option. The built-in probe is derived from
+AGPL-licensed IPQuality code and retains its upstream attribution, license, and
+modification notice.
 
 ## Related Decisions
 
-- [ADR 0001: Trust the upstream IPQuality probe](decisions/0001-trust-upstream-ipquality-probe.md)
+- [ADR 0001: Trust the upstream IPQuality probe (superseded)](decisions/0001-trust-upstream-ipquality-probe.md)
 - [ADR 0002: Require an Agent on every managed node](decisions/0002-require-managed-node-agent.md)
 - [ADR 0003: Support Linux and Docker Compose for the center](decisions/0003-linux-docker-compose-center.md)
 - [ADR 0004: Separate address checks from complete probes](decisions/0004-separate-address-checks-and-probes.md)
@@ -469,7 +464,7 @@ runtime-downloaded IPQuality script retain their own licenses and notices.
 - [ADR 0016: Support AMD64 and ARM64 Linux](decisions/0016-linux-amd64-arm64.md)
 - [ADR 0017: Limit Agent distribution support](decisions/0017-agent-linux-distributions.md)
 - [ADR 0018: Sandbox JavaScript notification senders](decisions/0018-javascript-notification-sandbox.md)
-- [ADR 0019: Require 256 MiB on Agent nodes](decisions/0019-agent-minimum-memory.md)
+- [ADR 0019: Require 256 MiB on Agent nodes (superseded)](decisions/0019-agent-minimum-memory.md)
 - [ADR 0020: Set first-release resource targets](decisions/0020-resource-targets.md)
 - [ADR 0021: Use Go with a React and TypeScript frontend](decisions/0021-go-react-technology-stack.md)
 - [ADR 0022: Keep product source in one repository](decisions/0022-product-monorepo.md)
@@ -501,3 +496,4 @@ runtime-downloaded IPQuality script retain their own licenses and notices.
 - [ADR 0048: Support Simplified Chinese and English](decisions/0048-support-chinese-and-english.md)
 - [ADR 0049: Use Vite for the web build](decisions/0049-use-vite-for-the-web-build.md)
 - [ADR 0055: Scope network proxies to nodes and discover both address families](decisions/0055-scope-network-proxies-to-nodes.md)
+- [ADR 0063: Implement the complete probe in Go](decisions/0063-native-go-complete-probe.md)

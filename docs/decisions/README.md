@@ -15,7 +15,7 @@ Do not use an ADR to document a decision that has not been made.
 
 ## Records
 
-- [0001: Trust the upstream IPQuality probe](0001-trust-upstream-ipquality-probe.md)
+- [0001: Trust the upstream IPQuality probe (superseded by 0063)](0001-trust-upstream-ipquality-probe.md)
 - [0002: Require an Agent on every managed node](0002-require-managed-node-agent.md)
 - [0003: Support Linux and Docker Compose for the center](0003-linux-docker-compose-center.md)
 - [0004: Separate address checks from complete probes (partially superseded by 0059 and 0060)](0004-separate-address-checks-and-probes.md)
@@ -33,7 +33,7 @@ Do not use an ADR to document a decision that has not been made.
 - [0016: Support AMD64 and ARM64 Linux](0016-linux-amd64-arm64.md)
 - [0017: Limit Agent distribution support](0017-agent-linux-distributions.md)
 - [0018: Sandbox JavaScript notification senders](0018-javascript-notification-sandbox.md)
-- [0019: Require 256 MiB on Agent nodes](0019-agent-minimum-memory.md)
+- [0019: Require 256 MiB on Agent nodes (superseded by 0063)](0019-agent-minimum-memory.md)
 - [0020: Set first-release resource targets](0020-resource-targets.md)
 - [0021: Use Go with a React and TypeScript frontend](0021-go-react-technology-stack.md)
 - [0022: Keep product source in one repository](0022-product-monorepo.md)
@@ -77,3 +77,4 @@ Do not use an ADR to document a decision that has not been made.
 - [0060: Use explicit browser-default timezones](0060-use-explicit-browser-default-timezones.md)
 - [0061: Separate manual probe selection from recurring enablement](0061-separate-manual-probe-selection-from-recurring-enablement.md)
 - [0062: Probe new public IPs on established nodes](0062-probe-new-public-ips-on-established-nodes.md)
+- [0063: Implement the complete probe in Go](0063-native-go-complete-probe.md)
