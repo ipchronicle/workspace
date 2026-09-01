@@ -2,10 +2,12 @@
 /references/
 /data/
 /artifacts/
+/tmp/
 /.env
 /.env.*
 !/.env.example
 
 .DS_Store
 .idea/
-.vscode/
+.vscode/*
+!/.vscode/settings.json
