@@ -307,10 +307,13 @@ The intended product scope includes:
 - each public IP has independent complete-probe enablement and is enabled by
   default when first created;
 - each node has one default-enabled setting for automatic probing when an
-  established confirmed public-IP set gains an address. A first observation
-  on a path does not trigger it. The node-level run contains only newly current
-  enabled IPs after the Agent applies their selected paths. Whether an IP has
-  appeared before only determines history association;
+  established confirmed public-IP set gains an address. The node's first
+  confirmed set establishes its initial baseline without triggering it; after
+  that baseline exists, a new IP first observed through a newly configured
+  proxy triggers under the same rule as any other newly current IP. The
+  node-level run contains only newly current enabled IPs after the Agent
+  applies their selected paths. Whether an IP has appeared before only
+  determines history association;
 - complete-probe schedule occurrences missed while the Agent is stopped or
   busy are shown as skipped and are not queued or executed later; applying a
   new schedule starts with its next future occurrence;

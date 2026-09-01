@@ -1,6 +1,6 @@
 # ADR 0059: Probe newly current public IPs by node policy
 
-Status: Accepted (manual target policy refined by ADR 0061)
+Status: Accepted (manual target policy refined by ADR 0061; initial-baseline scope refined by ADR 0062)
 
 Date: 2026-08-30
 

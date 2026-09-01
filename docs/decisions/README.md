@@ -73,6 +73,7 @@ Do not use an ADR to document a decision that has not been made.
 - [0056: Separate Agent uninstall from local-state purge](0056-separate-agent-uninstall-from-state-purge.md)
 - [0057: Enable newly discovered public addresses by default (partially superseded by 0059)](0057-enable-new-public-addresses-by-default.md)
 - [0058: Defer persisted-data compatibility until the first stable release](0058-defer-persisted-data-compatibility-until-first-release.md)
-- [0059: Scope automatic address-change probing to nodes (manual policy refined by 0061)](0059-scope-address-change-probing-to-nodes.md)
+- [0059: Scope automatic address-change probing to nodes (manual policy refined by 0061; initial-baseline scope refined by 0062)](0059-scope-address-change-probing-to-nodes.md)
 - [0060: Use explicit browser-default timezones](0060-use-explicit-browser-default-timezones.md)
 - [0061: Separate manual probe selection from recurring enablement](0061-separate-manual-probe-selection-from-recurring-enablement.md)
+- [0062: Probe new public IPs on established nodes](0062-probe-new-public-ips-on-established-nodes.md)

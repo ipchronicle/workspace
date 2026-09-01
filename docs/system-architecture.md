@@ -240,10 +240,12 @@ to ordinary polling.
 5. A newly discovered public IP is enabled for complete probing by default.
    Each node has one default-enabled automatic new-address policy. The Agent
    derives a deduplicated confirmed IP set from its hidden path observations;
-   failures do not alter that baseline. A first observation on a path never
-   triggers the policy. Later additions start a run containing only newly
-   current enabled IPs after the Agent applies their selected paths. Prior
-   appearances affect only canonical history association.
+   failures do not alter that baseline. The node's first confirmed set
+   establishes its initial baseline without triggering the policy. Once that
+   baseline exists, any newly current canonical IP starts a run containing
+   only newly current enabled IPs after the Agent applies their selected
+   paths, including an IP first observed through a newly configured proxy.
+   Prior appearances affect only canonical history association.
 
 Registration itself and the first confirmed address do not run a complete
 probe.
