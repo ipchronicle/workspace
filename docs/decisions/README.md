@@ -79,3 +79,4 @@ Do not use an ADR to document a decision that has not been made.
 - [0062: Probe new public IPs on established nodes](0062-probe-new-public-ips-on-established-nodes.md)
 - [0063: Implement the complete probe in Go](0063-native-go-complete-probe.md)
 - [0064: Centrally manage the optional ipapi API key](0064-central-ipapi-api-key.md)
+- [0065: Support broad notification routing](0065-support-broad-notification-routing.md)
