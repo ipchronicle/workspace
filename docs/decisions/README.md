@@ -81,3 +81,4 @@ Do not use an ADR to document a decision that has not been made.
 - [0064: Centrally manage the optional ipapi API key](0064-central-ipapi-api-key.md)
 - [0065: Support broad notification routing](0065-support-broad-notification-routing.md)
 - [0066: Render semantic Telegram notifications](0066-render-semantic-telegram-notifications.md)
+- [0067: Localize known probe values at presentation boundaries](0067-localize-known-probe-values-at-presentation.md)
