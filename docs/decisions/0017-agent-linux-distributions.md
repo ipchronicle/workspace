@@ -1,6 +1,6 @@
 # ADR 0017: Limit Agent distribution support
 
-Status: Accepted
+Status: Accepted, release-validation cadence refined by ADR 0070
 
 Date: 2026-08-06
 

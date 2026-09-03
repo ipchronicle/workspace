@@ -84,3 +84,4 @@ Do not use an ADR to document a decision that has not been made.
 - [0067: Localize known probe values at presentation boundaries](0067-localize-known-probe-values-at-presentation.md)
 - [0068: Establish v0.1.0 as the persisted-data compatibility baseline](0068-establish-v0.1.0-persisted-data-baseline.md)
 - [0069：使用独立 GitHub Pages 仓库发布在线文档](0069-publish-documentation-with-github-pages.md)
+- [0070：分级执行持续集成与发布验证](0070-tier-ci-and-release-validation.md)

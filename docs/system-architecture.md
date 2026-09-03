@@ -473,10 +473,12 @@ irreversibly upgrade bbolt metadata or delete referenced result files before
 the updater can restore an executable-and-state combination readable by the
 previous version, or before the new version is committed healthy.
 
-Every release tests the distribution matrix defined by ADR 0017, both AMD64
-and ARM64 artifacts, systemd and OpenRC lifecycle, upgrade and Agent rollback,
-database migrations, cross-version contracts, core browser workflows,
-security redaction, a live built-in probe, and the accepted capacity scenario.
+Every release builds and verifies both AMD64 and ARM64 artifacts. Routine
+changes pass fast source checks, while expensive browser, container,
+distribution, resource, reproducibility, migration, and rollback gates run for
+the change scopes they protect. Releases whose patch component is zero run the
+complete gate set, and scheduled extended CI provides a periodic backstop.
+ADR 0070 defines the validation tiers and trigger rules.
 
 ## Deferred Implementation Decisions
 

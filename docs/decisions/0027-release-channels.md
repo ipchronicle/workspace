@@ -1,6 +1,6 @@
 # ADR 0027: Publish stable and release-candidate channels
 
-Status: Accepted
+Status: Accepted, container-tag publication refined by ADR 0070
 
 Date: 2026-08-06
 

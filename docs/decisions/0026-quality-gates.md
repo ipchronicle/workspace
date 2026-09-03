@@ -1,6 +1,6 @@
 # ADR 0026: Require merge and release quality gates
 
-Status: Accepted
+Status: Partially superseded by ADR 0070
 
 Date: 2026-08-06
 
