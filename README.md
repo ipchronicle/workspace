@@ -48,3 +48,6 @@ ipchronicle-workspace/
 
 Center、Web、Agent 和部署资产属于同一产品源码边界。只有出现独立产品、
 团队、权限、许可证或发布生命周期，并形成新的 ADR 后，才重新评估拆分。
+
+除第三方材料另有说明外，本仓库内容采用
+[`AGPL-3.0-only`](LICENSE) 许可证。
