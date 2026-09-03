@@ -18,7 +18,7 @@
 - IPChronicle 是一个从头实现的独立项目，首个稳定版 `v0.1.0` 已于 2026-09-03 发布。
 - 旧项目 `Komari-ip-history` 只作为需求、交互和工程问题的参考库。
 - 首版产品范围、主要系统边界、技术栈、部署方式和单仓库边界已经形成确认记录，并落实到稳定版本。
-- 产品源码位于单一的 `ipchronicle/ipchronicle` 仓库中；现有 `server`、`web`、`agent`、`deploy` 预留仓库不参与既定架构。
+- 产品源码、部署资产和发布工具位于单一的 [`ipchronicle/ipchronicle`](https://github.com/ipchronicle/ipchronicle) 仓库中。
 - workspace 暂不提供 bootstrap、统一检查、commit lock 或开发环境脚本；真正出现重复流程后再决定是否需要自动化。
 
 ## 本地目录约定
@@ -40,12 +40,11 @@ ipchronicle-workspace/
 └── references/     # ignored，放旧项目等参考仓库
 ```
 
-GitHub 组织中目前预留了以下仓库：
+## GitHub 仓库边界
 
-- `ipchronicle/workspace`
-- `ipchronicle/server`
-- `ipchronicle/web`
-- `ipchronicle/agent`
-- `ipchronicle/deploy`
+- [`ipchronicle/ipchronicle`](https://github.com/ipchronicle/ipchronicle)：完整产品源码、部署资产、测试和版本发布。
+- [`ipchronicle/workspace`](https://github.com/ipchronicle/workspace)：产品背景、架构决策和跨项目工程约束。
+- [`ipchronicle/.github`](https://github.com/ipchronicle/.github)：组织首页和公共协作文件。
 
-这些预留仓库不参与首版实现，不应为了填充名称而写入产品代码。未来只有在出现独立产品、团队、权限、许可证或发布边界并形成新 ADR 后，才重新评估拆分。
+Center、Web、Agent 和部署资产属于同一产品源码边界。只有出现独立产品、
+团队、权限、许可证或发布生命周期，并形成新的 ADR 后，才重新评估拆分。

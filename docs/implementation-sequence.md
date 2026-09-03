@@ -16,8 +16,8 @@ The sequence favors end-to-end slices that leave observable, testable behavior
 instead of building the complete backend, Agent, or frontend in isolation. UI,
 API, persistence, failure state, and tests for a slice advance together.
 
-No compatibility with Komari, the legacy database, legacy APIs, or the reserved
-`server`, `web`, `agent`, and `deploy` repositories is an implementation goal.
+No compatibility with Komari, the legacy database, legacy APIs, or historical
+repository scaffolds is an implementation goal.
 
 ## Working Rules
 

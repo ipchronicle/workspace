@@ -459,8 +459,8 @@ provide center HA or active replicas.
 Product source belongs in one `ipchronicle/ipchronicle` repository containing
 center, Agent, web, neutral protocol definitions, deployment assets, tests,
 and release tooling. The workspace remains a separate documentation and
-decision repository. Reserved `server`, `web`, `agent`, and `deploy`
-repositories are not first-release component boundaries.
+decision repository. Runtime component roles do not by themselves establish
+separate source repositories.
 
 One semantic version and Git tag build all product artifacts. Stable and RC
 are the supported channels. A center supports Agents within the same product

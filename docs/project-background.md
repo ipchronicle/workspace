@@ -43,9 +43,9 @@ IPChronicle 的前身是 `Komari-ip-history`。旧项目最初围绕 Komari 开�
 - [UI 信息架构](ui-information-architecture.md) 记录首版界面已经确认的页面
   职责、导航关系和仍待确定的交互边界。
 
-产品源码采用单一 `ipchronicle/ipchronicle` 仓库。现有 `server`、`web`、
-`agent`、`deploy` 预留仓库不构成首版组件边界，也不应为了利用预留名称
-而拆分实现。
+产品源码采用单一 `ipchronicle/ipchronicle` 仓库，Center、Web、Agent、
+协议、部署资产、测试和发布工具均在该仓库共同演进。workspace 继续作为
+独立的背景和架构决策仓库。
 
 ## 旧项目如何使用
 
