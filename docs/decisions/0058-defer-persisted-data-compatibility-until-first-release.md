@@ -1,6 +1,6 @@
 # ADR 0058: Defer persisted-data compatibility until the first stable release
 
-Status: Accepted
+Status: Superseded by ADR 0068
 
 Date: 2026-08-30
 

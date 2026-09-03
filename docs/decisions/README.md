@@ -72,7 +72,7 @@ Do not use an ADR to document a decision that has not been made.
 - [0055: Scope network proxies to nodes and discover both address families](0055-scope-network-proxies-to-nodes.md)
 - [0056: Separate Agent uninstall from local-state purge](0056-separate-agent-uninstall-from-state-purge.md)
 - [0057: Enable newly discovered public addresses by default (partially superseded by 0059)](0057-enable-new-public-addresses-by-default.md)
-- [0058: Defer persisted-data compatibility until the first stable release](0058-defer-persisted-data-compatibility-until-first-release.md)
+- [0058: Defer persisted-data compatibility until the first stable release (superseded by 0068)](0058-defer-persisted-data-compatibility-until-first-release.md)
 - [0059: Scope automatic address-change probing to nodes (manual policy refined by 0061; initial-baseline scope refined by 0062)](0059-scope-address-change-probing-to-nodes.md)
 - [0060: Use explicit browser-default timezones](0060-use-explicit-browser-default-timezones.md)
 - [0061: Separate manual probe selection from recurring enablement](0061-separate-manual-probe-selection-from-recurring-enablement.md)
@@ -82,3 +82,4 @@ Do not use an ADR to document a decision that has not been made.
 - [0065: Support broad notification routing](0065-support-broad-notification-routing.md)
 - [0066: Render semantic Telegram notifications](0066-render-semantic-telegram-notifications.md)
 - [0067: Localize known probe values at presentation boundaries](0067-localize-known-probe-values-at-presentation.md)
+- [0068: Establish v0.1.0 as the persisted-data compatibility baseline](0068-establish-v0.1.0-persisted-data-baseline.md)
