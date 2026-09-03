@@ -21,6 +21,7 @@
 - 旧项目 `Komari-ip-history` 只作为需求、交互和工程问题的参考库。
 - 首版产品范围、主要系统边界、技术栈、部署方式和单仓库边界已经形成确认记录，并落实到稳定版本。
 - 产品源码、部署资产和发布工具位于单一的 [`ipchronicle/ipchronicle`](https://github.com/ipchronicle/ipchronicle) 仓库中。
+- 最新稳定版在线文档位于 [`ipchronicle/ipchronicle.github.io`](https://github.com/ipchronicle/ipchronicle.github.io)，默认中文并提供英文页面。
 - workspace 暂不提供 bootstrap、统一检查、commit lock 或开发环境脚本；真正出现重复流程后再决定是否需要自动化。
 
 ## 本地目录约定
@@ -47,6 +48,7 @@ ipchronicle-workspace/
 - [`ipchronicle/ipchronicle`](https://github.com/ipchronicle/ipchronicle)：完整产品源码、部署资产、测试和版本发布。
 - [`ipchronicle/workspace`](https://github.com/ipchronicle/workspace)：产品背景、架构决策和跨项目工程约束。
 - [`ipchronicle/.github`](https://github.com/ipchronicle/.github)：组织首页和公共协作文件。
+- [`ipchronicle/ipchronicle.github.io`](https://github.com/ipchronicle/ipchronicle.github.io)：最新稳定版的中英文在线使用与运维文档。
 
 Center、Web、Agent 和部署资产属于同一产品源码边界。只有出现独立产品、
 团队、权限、许可证或发布生命周期，并形成新的 ADR 后，才重新评估拆分。

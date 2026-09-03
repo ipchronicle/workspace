@@ -39,6 +39,9 @@ authoritative decision record.
 - Product source, deployment assets, and release tooling live in the single
   [`ipchronicle/ipchronicle`](https://github.com/ipchronicle/ipchronicle)
   repository.
+- Online documentation for the latest stable release lives in
+  [`ipchronicle/ipchronicle.github.io`](https://github.com/ipchronicle/ipchronicle.github.io),
+  with Simplified Chinese as the default and English counterparts.
 - The workspace does not currently provide bootstrap, shared checks, commit
   locks, or development-environment scripts. Automation will be added only
   after a repeated workflow demonstrates the need.
@@ -70,6 +73,9 @@ ipchronicle-workspace/
   background, architecture decisions, and cross-project engineering rules.
 - [`ipchronicle/.github`](https://github.com/ipchronicle/.github): organization
   profile and shared community health files.
+- [`ipchronicle/ipchronicle.github.io`](https://github.com/ipchronicle/ipchronicle.github.io):
+  online user and operator documentation for the latest stable release in
+  Simplified Chinese and English.
 
 The Center, Web interface, Agent, and deployment assets belong to one product
 source boundary. A split should be reconsidered only when a distinct product,

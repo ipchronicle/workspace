@@ -83,3 +83,4 @@ Do not use an ADR to document a decision that has not been made.
 - [0066: Render semantic Telegram notifications](0066-render-semantic-telegram-notifications.md)
 - [0067: Localize known probe values at presentation boundaries](0067-localize-known-probe-values-at-presentation.md)
 - [0068: Establish v0.1.0 as the persisted-data compatibility baseline](0068-establish-v0.1.0-persisted-data-baseline.md)
+- [0069：使用独立 GitHub Pages 仓库发布在线文档](0069-publish-documentation-with-github-pages.md)

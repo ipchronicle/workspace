@@ -45,7 +45,9 @@ IPChronicle 的前身是 `Komari-ip-history`。旧项目最初围绕 Komari 开�
 
 产品源码采用单一 `ipchronicle/ipchronicle` 仓库，Center、Web、Agent、
 协议、部署资产、测试和发布工具均在该仓库共同演进。workspace 继续作为
-独立的背景和架构决策仓库。
+独立的背景和架构决策仓库。最新稳定版的中英文在线使用文档由独立的
+`ipchronicle/ipchronicle.github.io` 仓库通过 GitHub Pages 发布；特定版本的
+冻结离线文档仍属于产品 Release。
 
 ## 旧项目如何使用
 
