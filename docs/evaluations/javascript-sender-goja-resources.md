@@ -168,12 +168,37 @@ isolation and concurrency boundaries.
   not used as the normal worker isolation mechanism because the accepted
   architecture runs workers as child processes, not separate containers.
 
+## Go 1.26.5 Re-evaluation
+
+The resource boundary was re-evaluated after the Center toolchain moved to Go
+1.26.5. Go 1.26 enables the Green Tea garbage collector by default. Under the
+worker's 128 MiB `RLIMIT_DATA`, the retained-allocation fixture did not always
+terminate with Go's normal fatal out-of-memory path: repeated runs also
+reproduced `SIGSEGV` failures inside `runtime/mgcmark_greenteagc.go`. This is an
+unsafe failure mode for the worker boundary even though it remains isolated
+from the long-lived Center process.
+
+Go 1.26 documents `GOEXPERIMENT=nogreenteagc` as its build-time opt-out. Center
+builds use that opt-out while retaining the 128 MiB data limit. The Agent does
+not use the JavaScript worker and keeps the default compiler configuration.
+Fifty repeated runs of the normal HTTP, script failure, runaway execution,
+blocked HTTP, and retained-allocation worker scenarios passed with the opted-out
+collector. A separate fifty-run default-collector check confirmed that known
+Green Tea memory-limit crashes are still reduced to a bounded generic resource
+failure without returning raw runtime diagnostics.
+
+This is a Go 1.26-specific implementation constraint, not a permanent runtime
+selection. The worker boundary must be re-evaluated before adopting Go 1.27 or
+removing the opt-out, because the documented opt-out is expected to disappear
+in Go 1.27.
+
 ## Conclusion
 
 The selected goja worker model is viable within the 512 MiB center baseline
 when worker concurrency is bounded. Normal scenarios stayed below 25 MiB RSS,
 including the large fixture, and worker process termination canceled both
-runaway JavaScript and blocked network activity.
+runaway JavaScript and blocked network activity. Go 1.26 Center builds require
+the documented Green Tea collector opt-out until this boundary is re-evaluated.
 
 No single soft Go setting is a sufficient boundary. The evidence supports a
 layered design using worker-set `RLIMIT_DATA`, per-request deadlines, a parent
