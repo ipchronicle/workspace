@@ -1,5 +1,7 @@
 # IPChronicle Workspace
 
+简体中文 | [English](README.en.md)
+
 这个仓库是 IPChronicle 的本地开发工作区入口，负责保存项目背景、跨仓库协作规则和已经确认的长期决策。产品代码放在独立 Git 仓库中，不提交到 workspace 仓库。
 
 开始任何设计或开发前，先阅读 [项目背景](docs/project-background.md)。
