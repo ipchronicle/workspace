@@ -1,6 +1,6 @@
 # ADR 0068: Establish v0.1.0 as the persisted-data compatibility baseline
 
-Status: Accepted
+Status: Superseded by ADR 0071
 
 Date: 2026-09-03
 
