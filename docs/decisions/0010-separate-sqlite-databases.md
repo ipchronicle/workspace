@@ -1,6 +1,6 @@
 # ADR 0010: Separate SQLite configuration and history databases
 
-Status: Accepted
+Status: Partially superseded by ADR 0073
 
 Date: 2026-08-06
 
@@ -22,8 +22,9 @@ second source of truth and complicate cleanup and reconciliation.
 
 - The first release uses SQLite and does not offer PostgreSQL, MySQL, or a
   pluggable database abstraction as an alternative supported path.
-- The center uses two SQLite databases in separately addressable data paths or
-  Docker volumes: a configuration database and a history database.
+- The center uses separately addressable SQLite databases for configuration
+  and history. ADR 0073 later adds a third, disposable operational-log database
+  without changing the ownership of these two core stores.
 - The configuration database stores administrator identity, node identity and
   Agent credential digests, network-egress and proxy configuration, schedules,
   active and recent center-issued task state, notification configuration,

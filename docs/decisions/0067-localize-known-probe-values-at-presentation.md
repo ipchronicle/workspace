@@ -30,6 +30,9 @@ must not guess their meaning or hide them.
   risk level, boolean risk factors, standard country and continent codes,
   media availability and path, and mail connectivity. Country names retain the
   original two-letter code alongside the localized name.
+- Boolean risk factors render a confirmed true value as “Yes” and a confirmed
+  false value as “No”. An explicit JSON null renders as neutral “No data”; it
+  must not use wording that can be mistaken for an unperformed check.
 - Webhook event envelopes and the `ipchronicle.event` JavaScript object retain
   machine values. Human `title` and `body` strings supplied to a JavaScript
   sender may use the same localized presentation as other text notifications.

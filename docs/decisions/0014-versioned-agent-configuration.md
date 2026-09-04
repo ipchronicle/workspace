@@ -28,6 +28,11 @@ expected configuration size.
   backwards, including when the owner restores earlier settings.
 - The current history generation in ADR 0046 is part of effective Agent
   configuration. Advancing it creates a new desired revision for every Agent.
+- Per-node Agent log level is part of effective configuration for Agents that
+  advertise the corresponding logging capability. The center continues to
+  serve a compatible snapshot to same-major Agents without that capability;
+  gaining the capability creates a new desired revision so the upgraded Agent
+  fetches the setting.
 - When the desired and applied revisions differ, the Agent fetches the current
   complete configuration snapshot and its revision. It does not request or
   replay incremental configuration patches.

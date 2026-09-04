@@ -68,6 +68,9 @@ well below the RSS target and released result disk space after upload.
 - Small local state and events may remain directly in bbolt when doing so does
   not create another large-payload store. Exact treatment of bounded failure
   diagnostics remains an implementation detail subject to the resource tests.
+- Structured operational logs use dedicated bbolt buckets and byte/count
+  accounting under ADR 0073. Their limits and upload acknowledgements are
+  independent from address-event and complete-result queues.
 - Recoverable secrets are encrypted before they enter bbolt under ADR 0013.
   bbolt itself is not treated as an encryption boundary, and proxy credentials
   must never be written into result files.

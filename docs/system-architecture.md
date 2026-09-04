@@ -30,7 +30,8 @@ addresses and does not publish anonymous result pages.
           v
  +-------------------------------------------------------------+
  | IPChronicle center: one Go process in one Compose container |
- | Web UI | Admin API | Agent API | control | history | notify |
+| Web UI | Admin API | Agent API | control | history | logs |
+| notify                                                      |
  +-------------------------------------------------------------+
        | config.db + key              | history.db
        |                              |
@@ -71,6 +72,7 @@ The center is a modular monolith with explicit internal ownership for:
 - complete-probe runs, per-public-IP executions and snapshots, address events,
   comparison, and retention;
 - notification rules, durable delivery state, and sender execution; and
+- Agent log ingestion, indexed querying, and retention cleanup; and
 - embedded database migration and local operator commands.
 
 Work that must survive a center restart is persisted before bounded in-process
@@ -94,6 +96,7 @@ The Agent owns node-local behavior that must continue without the center:
 - durable application of complete configuration snapshots;
 - bounded offline result storage and idempotent replay;
 - task acknowledgement and execution deduplication; and
+- structured local logging with bounded, idempotent offline upload; and
 - administrator-triggered self-update with executable-and-local-state
   failed-start rollback.
 
@@ -204,12 +207,21 @@ reports, starred snapshots, or address events already assigned to them.
    current snapshot, validates and persists it atomically, then reports the
    applied revision. Invalid configuration leaves the previous snapshot active.
 
+Each registered node also has a separate long-lived recovery key. The center
+stores its digest and a master-key-encrypted copy so the administrator can
+render the node-specific installation command again. A recovery atomically
+replaces the daily Agent credential and preserves the node ID, configuration,
+public-IP ownership, and history while clearing host facts that the new Agent
+must report again. Recovery does not restore data that remained only on the old
+system disk.
+
 The host-local uninstall command removes the Agent services and binaries but
 preserves its state by default so a reinstall retains the node identity and
-offline queue. An explicit purge additionally removes the state directory and
-causes the next installation to create a new node. Neither host-local mode
-deletes the node or its history from the center, and center-side deletion does
-not claim to remove root-owned host software.
+offline queue. An explicit purge additionally removes the state directory. A
+later installation with the node-specific recovery command resumes the same
+center identity; the generic registration command creates a new node. Neither
+host-local mode deletes the node or its history from the center, and center-side
+deletion does not claim to remove root-owned host software.
 
 The snapshot includes the current history generation. After an operator
 recreates `history.db`, the center advances that generation, Agents discard
@@ -370,6 +382,13 @@ state without losing configuration or Agent registration. A replacement
 database records a newly advanced history generation; a mismatch between two
 existing databases stops startup rather than merging them.
 
+`logs.db` stores disposable Agent operational events, searchable metadata, and
+failed external response bodies. It has an independent age, logical-size, or
+indefinite retention policy and defaults to seven days. Removing only this
+database while the center is stopped discards logs without changing
+configuration, Agent identity, or probe history. It does not participate in the
+history generation.
+
 The center uses `mattn/go-sqlite3` through `database/sql`. Official AMD64 and
 ARM64 center images contain platform-native CGO builds on a pinned Debian slim
 runtime. The deployment host does not supply SQLite or a compiler, and this
@@ -383,7 +402,9 @@ size budget is not a hard SQLite-file or filesystem quota.
 
 Each Agent separately persists its identity, last valid configuration,
 encrypted referenced proxy credentials, current address state, handled-task
-records, and bounded offline queue metadata in bbolt. Complete JSON bodies are
+records, and bounded offline queue metadata in bbolt. Its independent log queue
+is limited to 64 MiB and 10,000 events; overflow evicts the oldest events and
+retains one aggregated gap record. Complete JSON bodies are
 stored as root-only immutable files and streamed independently; they are not
 large bbolt values. File publication uses sync, atomic rename, directory sync,
 and a committed metadata reference. Startup removes unreferenced files and

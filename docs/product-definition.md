@@ -89,6 +89,11 @@ multi-user collaboration.
 - Agent installation and automatic registration use one generated command.
   The user does not need to create a node first or complete a second manual
   configuration step.
+- Every registered node also has a separate, reusable and rotatable recovery
+  command. After a system reinstall it atomically replaces the old Agent
+  credential while preserving the same node identity, configuration, public-IP
+  associations, and center history. It does not recover data that was never
+  uploaded from the old system disk.
 - Agents do not update silently. The center shows available versions and lets
   the administrator trigger an update for one or several nodes. The Agent
   downloads only from official GitHub Releases, verifies artifact length,
@@ -196,6 +201,8 @@ multi-user collaboration.
 - The center uses separate SQLite configuration and history databases so
   history can be discarded and recreated without losing node enrollment or
   product configuration.
+- Disposable Agent operational logs use a third `logs.db` so log retention or
+  removal does not modify configuration or probe history.
 - A history generation stored with configuration prevents offline Agent queues
   from repopulating a deliberately recreated history database. Applying a new
   generation discards obsolete queued observations and runs fresh lightweight
@@ -341,8 +348,13 @@ The intended product scope includes:
   media and service availability, mail connectivity, and DNS blacklists;
 - current results for each public IP, with the selected node shown as execution
   provenance;
+- per-node structured Agent log levels, bounded offline log upload, a global
+  cross-node log view, and a node-filtered log view;
 - historical snapshots and field-level change views;
 - comparison between results from different points in time;
+- node-list multi-selection for Agent updates, one-time complete probes, and
+  log-level changes, with independent accepted, skipped, or failed outcomes per
+  node;
 - notification rules for result changes;
 - field-level notification rules are evaluated against one successful public-IP
   execution's change set, then all matches for the same sender are aggregated

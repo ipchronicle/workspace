@@ -1,6 +1,6 @@
 # ADR 0007: Use one-command automatic Agent registration
 
-Status: Accepted
+Status: Partially superseded by ADR 0074
 
 Date: 2026-08-06
 

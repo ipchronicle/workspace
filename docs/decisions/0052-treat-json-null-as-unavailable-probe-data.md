@@ -28,7 +28,8 @@ type can indicate that the upstream report format changed.
   missing.
 - Unknown paths whose terminal value is null remain in the raw JSON but do not
   create an unknown-field format issue.
-- Report matrices preserve the affected cell with a neutral unavailable marker.
+- Report matrices preserve the affected cell with a neutral localized
+  “No data” marker.
   A null boolean must not be rendered as a green negative result.
 - Missing paths, unknown non-null fields, and incompatible non-null values keep
   the format-diagnostic behavior defined by ADR 0035.
