@@ -1,6 +1,6 @@
 # ADR 0071：在版本投入正式使用后建立数据兼容基线
 
-Status: Accepted
+Status: Superseded by ADR 0072
 
 Date: 2026-09-04
 

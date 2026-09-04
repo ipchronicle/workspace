@@ -86,3 +86,4 @@ Do not use an ADR to document a decision that has not been made.
 - [0069：使用独立 GitHub Pages 仓库发布在线文档](0069-publish-documentation-with-github-pages.md)
 - [0070：分级执行持续集成与发布验证](0070-tier-ci-and-release-validation.md)
 - [0071：在版本投入正式使用后建立数据兼容基线](0071-defer-compatibility-until-production-use.md)
+- [0072：将 v0.1.1 设为首个生产数据兼容基线](0072-establish-v0.1.1-production-data-baseline.md)
