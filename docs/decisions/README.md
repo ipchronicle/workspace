@@ -89,3 +89,4 @@ Do not use an ADR to document a decision that has not been made.
 - [0072：将 v0.1.1 设为首个生产数据兼容基线](0072-establish-v0.1.1-production-data-baseline.md)
 - [0073：使用独立日志库和有界 Agent 日志队列](0073-store-and-upload-agent-logs.md)
 - [0074：使用节点恢复密钥接管原有身份](0074-recover-existing-node-identity.md)
+- [0075：对第三方探测请求执行有界重试](0075-retry-transient-probe-requests.md)
