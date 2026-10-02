@@ -77,6 +77,9 @@ IPChronicle 的前身是 `Komari-ip-history`。旧项目最初围绕 Komari 开�
 `v0.1.2` 已于 2026-09-09 发布，包含详细日志、节点身份恢复、批量操作、界面整改
 和第三方探测请求有界重试。发布验证与升级要求见
 [v0.1.2 发布验收](v0.1.2-release-acceptance.md)；首个持久数据兼容基线仍为 `v0.1.1`。
+`v0.1.3` 已于 2026-10-02 正式发布，移除 NAT 状态的用户展示与通知内容，并更新前端
+依赖安全版本。发布验证与镜像信息见产品仓库的
+[v0.1.3 Release](https://github.com/ipchronicle/ipchronicle/releases/tag/v0.1.3)。
 新会话应先阅读上述基线文档和最新 ADR，再检查 workspace 与产品仓库状态。Go、Node.js、
 OpenAPI、数据库和部署选择已经进入产品仓库；实现不得重新打开已经确认的
 产品、数据所有权、信任、部署或兼容边界。
