@@ -90,3 +90,4 @@ Do not use an ADR to document a decision that has not been made.
 - [0073：使用独立日志库和有界 Agent 日志队列](0073-store-and-upload-agent-logs.md)
 - [0074：使用节点恢复密钥接管原有身份](0074-recover-existing-node-identity.md)
 - [0075：对第三方探测请求执行有界重试](0075-retry-transient-probe-requests.md)
+- [0076：不把 NAT 映射作为用户状态](0076-hide-nat-as-user-state.md)
